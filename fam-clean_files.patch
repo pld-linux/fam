@@ -1,0 +1,8 @@
+--- fam-2.6.6/common.am.CLEANFILES	Thu Nov 29 19:06:58 2001
++++ fam-2.6.6/common.am	Thu Nov 29 19:07:13 2001
+@@ -10,3 +10,5 @@
+ EDITCONF = perl $(top_srcdir)/util/editconf/editconf.perl
+ 
+ uninstallscriptdir = $(pkglibdir)
++
++CLEANFILES =
