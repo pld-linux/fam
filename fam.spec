@@ -19,7 +19,7 @@ Prereq:		rc-inetd
 Requires:	inetdaemon
 Requires:	portmap
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-	
+
 %description
 fam, the File Alteration Monitor, provides a daemon and an API which
 applications can use to be notified when specific files or directories
