@@ -14,33 +14,6 @@ diff -urP orig/acconfig.h dnotify/acconfig.h
 diff -urP orig/configure.in dnotify/configure.in
 --- orig/configure.in	Mon Nov  5 00:31:30 2001
 +++ dnotify/configure.in	Thu Nov 29 18:18:10 2001
-@@ -39,6 +39,9 @@
- dnl  Put configuration #defines in config.h.
- AM_CONFIG_HEADER(config.h)
- 
-+dnl Initialize libtool
-+AM_PROG_LIBTOOL
-+
- dnl
- dnl  We want to include our header in $(top_srcdir)/include
- dnl
-@@ -79,14 +82,14 @@
- dnl I don't know why, but automake wants to use ./mkinstalldirs.
- dnl AC_PATH_PROG(MKINSTALLDIRS, mkinstalldirs)
- AC_PROG_MAKE_SET
-+
-+
- dnl AC_PROG_AWK
- dnl AC_PATH_PROG(LIBTOOL, libtool)
--AM_PROG_LIBTOOL
- dnl  autoconf/automake expects GNU tar, so find it on IRIX.
- AC_PATH_PROG(TAR, tar, tar, /usr/freeware/bin:$PATH)
- AC_PATH_PROG(LDCONFIG, ldconfig)
- 
--
- dnl
- dnl  Checks for header files.
- dnl
 @@ -96,6 +99,24 @@
  dnl AC_CHECK_HEADERS(fcntl.h limits.h sys/time.h syslog.h unistd.h)
  
