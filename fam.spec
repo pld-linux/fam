@@ -3,7 +3,7 @@ Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.6.10
-Release:	1.3
+Release:	2
 License:	GPL
 Group:		Networking/Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
@@ -67,7 +67,7 @@ Summary(pl):	Pliki nag³ówkowe FAM
 Summary(pt_BR):	Arquivos para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
-Requires:	%{name}-libs = %{version}
+Requires:	%{name}-libs = %{version}-%{release}
 Obsoletes:	libfam0-devel
 
 %description devel
@@ -85,7 +85,7 @@ Summary(pl):	Biblioteki statyczne FAM
 Summary(pt_BR):	Bibliotecas estáticas para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}
+Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 FAM static libraries.
