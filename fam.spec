@@ -104,6 +104,7 @@ Bibliotecas estáticas para desenvolvimento com a libfam.
 %{__libtoolize}
 %{__aclocal}
 %{__autoconf}
+%{__autoheader}
 %{__automake}
 CXXFLAGS="%{rpmcflags} -fno-rtti -fno-exceptions"
 %configure
