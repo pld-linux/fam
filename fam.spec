@@ -13,6 +13,7 @@ Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpcsvc.patch
 Patch3:		%{name}-cleanup.patch
+Patch4:		%{name}-gcc34.patch
 URL:		http://oss.sgi.com/projects/fam/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -101,6 +102,7 @@ Bibliotecas estáticas para desenvolvimento com a libfam.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 rm -f missing

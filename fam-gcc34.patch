@@ -1,0 +1,106 @@
+diff -uNr fam-2.6.10.orig/fam/DNotify.c++ fam-2.6.10/fam/DNotify.c++
+--- fam-2.6.10.orig/fam/DNotify.c++	2004-02-17 12:56:54.000000000 +0100
++++ fam-2.6.10/fam/DNotify.c++	2004-02-17 13:00:18.321654784 +0100
+@@ -37,7 +37,7 @@
+ #include "Interest.h"
+ #include "Log.h"
+ #include "Scheduler.h"
+-#include "alloc.h"
++#include <malloc.h>
+ 
+ 
+ int DNotify::pipe_write_fd = -2;
+diff -uNr fam-2.6.10.orig/fam/IMon.c++ fam-2.6.10/fam/IMon.c++
+--- fam-2.6.10.orig/fam/IMon.c++	2003-04-15 06:21:31.000000000 +0200
++++ fam-2.6.10/fam/IMon.c++	2004-02-17 12:59:53.667402800 +0100
+@@ -42,7 +42,7 @@
+ #include "Interest.h"
+ #include "Log.h"
+ #include "Scheduler.h"
+-#include "alloc.h"
++#include <malloc.h>
+ 
+ int		   IMon::imonfd = -2;
+ IMon::EventHandler IMon::ehandler = NULL;
+diff -uNr fam-2.6.10.orig/fam/SmallTable.h fam-2.6.10/fam/SmallTable.h
+--- fam-2.6.10.orig/fam/SmallTable.h	2003-04-15 06:21:43.000000000 +0200
++++ fam-2.6.10/fam/SmallTable.h	2004-02-17 12:56:54.985566568 +0100
+@@ -98,7 +98,7 @@
+ }
+ 
+ template <class Tkey, class Tvalue>
+-SmallTable<Tkey, Tvalue>::Closure
++typename SmallTable<Tkey, Tvalue>::Closure
+ SmallTable<Tkey, Tvalue>::position(const Tkey& key) const
+ {
+     unsigned l = 0, r = n;
+diff -uNr fam-2.6.10.orig/include/BTree.h fam-2.6.10/include/BTree.h
+--- fam-2.6.10.orig/include/BTree.h	2004-02-17 13:02:07.000000000 +0100
++++ fam-2.6.10/include/BTree.h	2004-02-17 12:56:54.986566416 +0100
+@@ -236,7 +236,7 @@
+ //  to the right and returns them.
+ 
+ template <class Key, class Value>
+-BTree<Key, Value>::Closure
++typename BTree<Key, Value>::Closure
+ BTree<Key, Value>::Node::remove(unsigned j)
+ {
+     Key k = key[j];
+@@ -348,7 +348,7 @@
+ }
+ 
+ template <class Key, class Value>
+-BTree<Key, Value>::Closure
++typename BTree<Key, Value>::Closure
+ BTree<Key, Value>::Node::next(const Key& pred) const
+ {
+     if (!this)
+@@ -404,7 +404,7 @@
+ //  nodes as necessary on the way back.
+ 
+ template <class Key, class Value>
+-BTree<Key, Value>::Closure
++typename BTree<Key, Value>::Closure
+ BTree<Key, Value>::insert(Node *p, const Key& key, const Value& value)
+ {
+     if (!p) return Closure(key, value, 0);
+@@ -499,7 +499,7 @@
+ //  Returns UNDER if node p is too small afterward, OK otherwise.
+ 
+ template <class Key, class Value>
+-BTree<Key, Value>::Status
++typename BTree<Key, Value>::Status
+ BTree<Key, Value>::underflow(Node *p, unsigned i)
+ {
+     assert(p);
+@@ -557,7 +557,7 @@
+ 
+ 
+ template <class Key, class Value>
+-BTree<Key, Value>::Closure
++typename BTree<Key, Value>::Closure
+ BTree<Key, Value>::remove_rightmost(Node *p)
+ {
+     int i = p->n;
+@@ -587,7 +587,7 @@
+ //  back up.
+ 
+ template <class Key, class Value>
+-BTree<Key, Value>::Status
++typename BTree<Key, Value>::Status
+ BTree<Key, Value>::remove(Node *p, const Key& key)
+ {
+     if (!p)
+diff -uNr fam-2.6.10.orig/libfam/Client.c++ fam-2.6.10/libfam/Client.c++
+--- fam-2.6.10.orig/libfam/Client.c++	2003-04-15 06:21:25.000000000 +0200
++++ fam-2.6.10/libfam/Client.c++	2004-02-17 12:56:54.987566264 +0100
+@@ -34,7 +34,8 @@
+ #include <syslog.h>
+ #include <errno.h>
+ 
+-#include <iostream.h>
++#include <iostream>
++using namespace std;
+ 
+ #include "fam.h"
+ #include "Client.h"
