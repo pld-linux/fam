@@ -89,8 +89,8 @@ Biblioteki statyczne FAM.
 rm -f missing
 libtoolize --copy --force
 aclocal
-autoconf
-automake -a -c -f
+%{__autoconf}
+%{__automake}
 CXXFLAGS="%{rpmcflags} -fno-rtti -fno-exceptions"
 %configure
 %{__make}
