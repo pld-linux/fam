@@ -1,15 +1,13 @@
-# TODO:
-# - add rc-inetd support for fam service.
-#
 Summary:	Fam, the File Alteration Monitor
 Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.6.9
-Release:	5
+Release:	6
 License:	GPL
 Group:		Networking/Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
+Source1:	%{name}.inetd
 Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpcsvc.patch
@@ -115,12 +113,27 @@ CXXFLAGS="%{rpmcflags} -fno-rtti -fno-exceptions"
 
 %install
 rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT/etc/sysconfig/rc-inetd
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
+install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/rc-inetd/sgi_fam
+
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post
+if [ -f /var/lock/subsys/rc-inetd ]; then
+	/etc/rc.d/init.d/rc-inetd reload 1>&2
+else
+	echo "Type \"/etc/rc.d/init.d/rc-inetd start\" to start inet server" 1>&2
+fi
+
+%postun
+if [ -f /var/lock/subsys/rc-inetd ]; then
+	/etc/rc.d/init.d/rc-inetd reload
+fi
 
 %post	libs -p /sbin/ldconfig
 %postun	libs -p /sbin/ldconfig
@@ -130,6 +143,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc AUTHORS ChangeLog NEWS README TODO
 %attr(755,root,root) %{_bindir}/*
 %config %{_sysconfdir}/%{name}.conf
+%attr(640,root,root) /etc/sysconfig/rc-inetd/sgi_fam
 %{_mandir}/man1/fam.1m*
 
 %files libs
