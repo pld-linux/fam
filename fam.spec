@@ -7,13 +7,12 @@ License:	GPL/LGPL
 Group:		Networking/Daemons
 Group(de):	Netzwerkwesen/Server
 Group(pl):	Sieciowe/Serwery
-Group(ru):	Библиотеки
-Group(uk):	Б╕бл╕отеки
 Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
 Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-clean_files.patch
 Patch3:		%{name}-libstdc++.patch
+URL:		http://oss.sgi.com/projects/fam/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libstdc++-devel
@@ -21,7 +20,6 @@ BuildRequires:	libtool
 Prereq:		rc-inetd
 Requires:	inetdaemon
 Requires:	portmap
-URL:		http://oss.sgi.com/projects/fam/
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -48,7 +46,7 @@ Group(uk):	Б╕бл╕отеки
 %description libs
 Libraries for FAM.
 
-%description -l pl libs
+%description libs -l pl
 Biblioteki FAMa.
 
 %package devel
@@ -86,7 +84,7 @@ Requires:	%{name}
 %description static
 FAM static libraries.
 
-%description devel -l pl
+%description static -l pl
 Biblioteki statyczne FAM.
 
 %prep
@@ -116,8 +114,8 @@ gzip -9nf AUTHORS ChangeLog NEWS README TODO
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post libs	-p /sbin/ldconfig
-%postun	libs	-p /sbin/ldconfig
+%post	libs -p /sbin/ldconfig
+%postun	libs -p /sbin/ldconfig
 
 %files
 %defattr(644,root,root,755)
