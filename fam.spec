@@ -3,7 +3,7 @@ Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.6.10
-Release:	1.1
+Release:	1.2
 License:	GPL
 Group:		Networking/Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
@@ -20,7 +20,7 @@ BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
 Prereq:		rc-inetd
 Requires:	%{name}-libs = %{version}
-Requires:	inetdaemon
+Requires:	xinetd
 Requires:	portmap
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
