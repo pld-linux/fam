@@ -1,0 +1,10 @@
+--- fam-2.6.7/libfam/Makefile.am.supc++	Mon Jan  7 14:12:01 2002
++++ fam-2.6.7/libfam/Makefile.am	Mon Jan  7 14:13:26 2002
+@@ -8,6 +8,7 @@
+   fam.c++
+ 
+ libfam_la_LDFLAGS = -export-symbols fam.sym
++libfam_la_LIBADD = -lstdc++
+ 
+ EXTRA_DIST = fam.sym
+ 
