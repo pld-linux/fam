@@ -19,16 +19,11 @@ BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
-Prereq:		rc-inetd
-Requires:	%{name}-libs = %{version}
+PreReq:		rc-inetd
+Requires:	%{name}-libs = %{version}-%{release}
 Requires:	inetdaemon
 Requires:	portmap
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-
-%define		_gcc_ver	%(%{__cc} -dumpversion | cut -b 1)
-%if %{_gcc_ver} == 2
-%define		__cxx		"%{__cc}"
-%endif
 
 %description
 fam, the File Alteration Monitor, provides a daemon and an API which
@@ -68,6 +63,7 @@ Summary(pt_BR):	Arquivos para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
+Requires:	libstdc++-devel
 Obsoletes:	libfam0-devel
 
 %description devel
@@ -105,7 +101,6 @@ Bibliotecas estáticas para desenvolvimento com a libfam.
 %patch4 -p1
 
 %build
-rm -f missing
 %{__libtoolize}
 %{__aclocal}
 %{__autoconf}
