@@ -10,6 +10,7 @@ Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-clean_files.patch
 Patch3:		%{name}-libstdc++.patch
+Patch4:		%{name}-rpcsvc.patch
 URL:		http://oss.sgi.com/projects/fam/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -72,6 +73,7 @@ Biblioteki statyczne FAM.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 rm -f missing
