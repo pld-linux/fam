@@ -6,7 +6,7 @@ Version:	2.6.10
 Release:	2
 License:	GPL
 Group:		Networking/Daemons
-Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
+Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
 # Source0-md5:	1c5a2ea659680bdd1e238d7828a857a7
 Source1:	%{name}.inetd
 Patch0:		%{name}-dnotify.patch
