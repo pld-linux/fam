@@ -3,6 +3,7 @@
 #
 Summary:	Fam, the File Alteration Monitor
 Summary(pl):	Monitor zmian w plikach
+Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.6.9
 Release:	1
@@ -37,9 +38,15 @@ are changed.
 fam dostarcza serwer i API pozwalaj±ce aplikacjom na uzyskiwanie
 informacji o zmianach w okre¶lonych plikach lub katalogach.
 
+%description -l pt_BR
+O fam fornece um servidor e uma API que aplicações podem usar para
+receber notificações sobre mudanças em arquivos ou diretórios
+específicos.
+
 %package libs
 Summary:	Libraries for FAM
 Summary(pl):	Biblioteki FAMa
+Summary(pt_BR):	FAM, um monitor de alteraçoes em arquivos
 License:	LGPL
 Group:		Libraries
 Obsoletes:	libfam0
@@ -50,9 +57,13 @@ Libraries for FAM.
 %description libs -l pl
 Biblioteki FAMa.
 
+%description libs -l pt_BR
+FAM, um monitor de alteraçoes em arquivos.
+
 %package devel
 Summary:	Includes to develop using FAM
 Summary(pl):	Pliki nag³ówkowe FAM
+Summary(pt_BR):	Arquivos para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}
@@ -64,9 +75,13 @@ Includes to develop using FAM.
 %description devel -l pl
 Pliki nag³ówkowe FAM.
 
+%description devel -l pt_BR
+Bibliotecas e arquivos de inclusão para desenvolvimento com a libfam.
+
 %package static
 Summary:	FAM static libraries
 Summary(pl):	Biblioteki statyczne FAM
+Summary(pt_BR):	Bibliotecas estáticas para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}
@@ -76,6 +91,9 @@ FAM static libraries.
 
 %description static -l pl
 Biblioteki statyczne FAM.
+
+%description static -l pt_BR
+Bibliotecas estáticas para desenvolvimento com a libfam.
 
 %prep
 %setup -q
