@@ -4,15 +4,14 @@
 Summary:	Fam, the File Alteration Monitor
 Summary(pl):	Monitor zmian w plikach
 Name:		fam
-Version:	2.6.7
-Release:	7
+Version:	2.6.9
+Release:	1
 License:	LGPL
 Group:		Networking/Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
 Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-build.patch
-Patch2:		%{name}-clean_files.patch
-Patch3:		%{name}-rpcsvc.patch
+Patch2:		%{name}-rpcsvc.patch
 URL:		http://oss.sgi.com/projects/fam/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -83,7 +82,6 @@ Biblioteki statyczne FAM.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
 
 %build
 rm -f missing
@@ -101,8 +99,6 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-gzip -9nf AUTHORS ChangeLog NEWS README TODO
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -111,9 +107,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc *.gz
+%doc AUTHORS ChangeLog NEWS README TODO
 %attr(755,root,root) %{_bindir}/*
 %config %{_sysconfdir}/%{name}.conf
+%{_mandir}/man1/fam.1m*
 
 %files libs
 %defattr(644,root,root,755)
