@@ -1,25 +1,30 @@
+# TODO:
+# - add rc-inetd suport for fam service.
+#
 Summary:	Fam, the File Alteration Monitor
 Summary(pl):	Monitor zmian w plikach
 Name:		fam
 Version:	2.6.7
-Release:	1
-License:	GPL/LGPL
+Release:	7
+License:	LGPL
 Group:		Networking/Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
 Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-clean_files.patch
-Patch3:		%{name}-libstdc++.patch
-Patch4:		%{name}-rpcsvc.patch
+Patch3:		%{name}-rpcsvc.patch
 URL:		http://oss.sgi.com/projects/fam/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
 Prereq:		rc-inetd
+Requires:	%{name}-libs = %{version}
 Requires:	inetdaemon
 Requires:	portmap
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		__cxx		%{__cc}
 
 %description
 fam, the File Alteration Monitor, provides a daemon and an API which
@@ -33,6 +38,7 @@ informacji o zmianach w okre¶lonych plikach lub katalogach.
 %package libs
 Summary:	Libraries for FAM
 Summary(pl):	Biblioteki FAMa
+License:	LGPL
 Group:		Libraries
 Obsoletes:	libfam0
 
@@ -45,8 +51,9 @@ Biblioteki FAMa.
 %package devel
 Summary:	Includes to develop using FAM
 Summary(pl):	Pliki nag³ówkowe FAM
+License:	LGPL
 Group:		Development/Libraries
-Requires:	%{name}-libs
+Requires:	%{name}-libs = %{version}
 Obsoletes:	libfam0-devel
 
 %description devel
@@ -58,8 +65,9 @@ Pliki nag³ówkowe FAM.
 %package static
 Summary:	FAM static libraries
 Summary(pl):	Biblioteki statyczne FAM
+License:	LGPL
 Group:		Development/Libraries
-Requires:	%{name}
+Requires:	%{name}-devel = %{version}
 
 %description static
 FAM static libraries.
@@ -73,7 +81,6 @@ Biblioteki statyczne FAM.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-%patch4 -p1
 
 %build
 rm -f missing
@@ -81,6 +88,7 @@ libtoolize --copy --force
 aclocal
 autoconf
 automake -a -c -f
+CXXFLAGS="%{rpmcflags} -fno-rtti -fno-exceptions"
 %configure
 %{__make}
 
