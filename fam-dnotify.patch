@@ -1,75 +1,6 @@
-diff -urP orig/acconfig.h dnotify/acconfig.h
---- orig/acconfig.h	Mon Oct 22 02:33:09 2001
-+++ dnotify/acconfig.h	Thu Nov 29 18:18:10 2001
-@@ -17,6 +17,9 @@
- /*  Define if the system has imon and IMONIOC_ ioctl flags.  */
- #undef HAVE_IMON
- 
-+/*  Define if the system has the dnotify fcntl and it's gonna be used.  */
-+#undef USE_DNOTIFY
-+
- /*  Define if the system has the struct revokdi and the IMONIOC_REVOKDI
- **  ioctl flag.  (IRIX 5.3 doesn't.)
- */
-diff -urP orig/configure.in dnotify/configure.in
---- orig/configure.in	Mon Nov  5 00:31:30 2001
-+++ dnotify/configure.in	Thu Nov 29 18:18:10 2001
-@@ -96,6 +99,24 @@
- dnl AC_CHECK_HEADERS(fcntl.h limits.h sys/time.h syslog.h unistd.h)
- 
- dnl
-+dnl  Test for the linux dnotify fcntl
-+dnl
-+AC_MSG_CHECKING([for dnotify fcntl support])
-+fam_save_cppflags="$CPPFLAGS"
-+CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
-+AC_TRY_COMPILE([
-+#define _GNU_SOURCE  
-+#include <fcntl.h>
-+#include <unistd.h>
-+],
-+[ int fd = 1;
-+  fcntl (fd, F_NOTIFY, (DN_MODIFY|DN_CREATE|DN_DELETE|DN_RENAME|DN_ATTRIB)|DN_MULTISHOT);
-+], have_dnotify=yes, have_dnotify=no)
-+use_dnotify=false
-+CPPFLAGS="$pango_save_cppflags"
-+AC_MSG_RESULT($have_dnotify)
-+
-+dnl
- dnl  See if imon is available; if so, is it IRIX or Linux?
- dnl
- if test `uname` = 'IRIX' || test `uname` = 'IRIX64'; then
-@@ -118,11 +139,17 @@
- if test "$have_imon" != "yes"; then
-     have_imon=no
-     AC_DEFINE(HAVE_IMON, 0)
-+    if test "$have_dnotify" = "yes"; then
-+        AC_DEFINE(USE_DNOTIFY)
-+	use_dnotify=true
-+    fi
-     IMON_FUNCS=IMonNone
- fi
-+AM_CONDITIONAL(USE_DNOTIFY, $use_dnotify)
- AC_SUBST(IMON_FUNCS)
- echo "Using imon support module $IMON_FUNCS"
- 
-+
- AC_CHECK_HEADER(sys/statvfs.h, [AC_DEFINE(HAVE_STATVFS, 1) have_statvfs="yes"], [AC_DEFINE(HAVE_STATVFS, 0) have_statvfs="no"])
- AC_CHECK_HEADER(sys/syssgi.h,  AC_DEFINE(HAVE_SYSSGI,  1), AC_DEFINE(HAVE_SYSSGI,  0))
- AC_CHECK_HEADER(sys/fs/nfs_clnt.h, AC_DEFINE(HAVE_SYS_FS_NFS_CLNT_H, 1), AC_DEFINE(HAVE_SYS_FS_NFS_CLNT_H, 0))
-@@ -572,7 +599,7 @@
- dnl 
- dnl  fam is a good deal less interesting without imon.
- dnl 
--if test "$have_imon" != 'yes'; then
-+if test "$have_imon" != 'yes' -a "$have_dnotify" != 'yes'; then
-     cat << EOF
- 
-   ******************************************************************
-diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
---- orig/fam/DNotify.c++	Wed Dec 31 19:00:00 1969
-+++ dnotify/fam/DNotify.c++	Thu Nov 29 18:18:10 2001
-@@ -0,0 +1,557 @@
+--- /dev/null	2003-09-15 15:40:47.000000000 +0200
++++ fam-2.6.10/fam/DNotify.c++	2004-02-04 11:13:04.000000000 +0100
+@@ -0,0 +1,655 @@
 +//  Copyright (C) 2001 Red Hat, Inc.  All Rights Reserved.
 +//  Copyright (C) 1999 Silicon Graphics, Inc.  All Rights Reserved.
 +//  
@@ -126,22 +57,135 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +
 +struct DNotify::FileWatch
 +{
-+    DirWatch *dir_watch;
++    DirWatch **dir_watch;
++    int n_dir_watches;
 +    dev_t file_dev;
 +    ino_t file_ino;
-+    FileWatch *next; // The DirWatch.watches list
 +    FileWatch *hash_link;
++    
++    FileWatch(void) {
++	dir_watch = NULL;
++	n_dir_watches = 0;
++    }
++
++    void add_dir_watch (DirWatch *w);
++    bool has_dir_watch (DirWatch *w);
 +};
++
 +
 +struct DNotify::DirWatch
 +{
-+    int fd;
++    class FileWatchList {
++    public:
++	struct Node {
++	    FileWatch *watch;
++	    Node *next;
++	};
++	
++	Node *first;
++
++	FileWatchList(void) {
++	    first = NULL;
++	}
++	
++	void prepend(FileWatch *watch);
++	void remove(FileWatch *watch);
++	bool empty(void);
++	int len(void);
++	
++    };
++    
 +    dev_t dir_dev;
 +    ino_t dir_ino;
-+    
++    int fd;
++
 +    DirWatch *hash_link;
-+    FileWatch *watches;
++    FileWatchList file_watches;
 +};
++
++struct DNotify::ChangeEventData
++{
++    dev_t file_dev;
++    ino_t file_ino;
++};    
++
++bool
++DNotify::FileWatch::has_dir_watch (DirWatch *w)
++{
++    int i;
++
++    for (i = 0; i < n_dir_watches; i++) {
++	if (dir_watch[i] == w)
++	    return true;
++    }
++    return false;
++}
++
++
++void
++DNotify::FileWatch::add_dir_watch (DirWatch *w)
++{
++    n_dir_watches++;
++    dir_watch = (DirWatch **)realloc (dir_watch, n_dir_watches*sizeof(DirWatch *));
++    dir_watch[n_dir_watches-1] = w;
++}
++
++bool
++DNotify::DirWatch::FileWatchList::empty(void)
++{
++    return first == NULL;
++}
++
++int
++DNotify::DirWatch::FileWatchList::len(void)
++{
++    int i;
++    Node *n;
++
++    i = 0;
++    n = first;
++    while (n) {
++	i++;
++	n = n->next;
++    }
++    
++    return i;
++}
++
++
++void
++DNotify::DirWatch::FileWatchList::prepend(FileWatch *watch)
++{
++    Node *node;
++
++    node = new Node;
++    node->watch = watch;
++    node->next = first;
++    
++    first = node;
++}
++
++void
++DNotify::DirWatch::FileWatchList::remove(FileWatch *watch) {
++    Node *l, *prev;
++    
++    l = first;
++    prev = NULL;
++    while (l) {
++	if (l->watch == watch) {
++	    if (prev)
++		prev->next = l->next;
++	    else
++		first = l->next;
++	    
++	    delete l;
++	    break;
++	}
++	prev = l;
++	l = prev->next;
++    }
++}
++
 +
 +DNotify::DNotify(EventHandler h)
 +{
@@ -151,8 +195,7 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +
 +DNotify::~DNotify()
 +{
-+    if (pipe_read_fd >= 0)
-+    {
++    if (pipe_read_fd >= 0) {
 +	//  Tell the scheduler.
 +
 +	(void) Scheduler::remove_read_handler(pipe_read_fd);
@@ -177,14 +220,13 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +DNotify::overflow_signal_handler(int sig, siginfo_t *si, void *data)
 +{
 +  char c = 'x';
-+  
++
 +  {
 +    char *str = "*************** overflow sigqueue ***********************\n";
-+    write (0, str, strlen(str));
++    write (STDERR_FILENO, str, strlen(str));
 +  }
 +
-+  if (!queue_overflowed)
-+  {
++  if (!queue_overflowed) {
 +      queue_overflowed = 1;
 +      // Trigger the read handler
 +      write(pipe_write_fd, &c, 1);
@@ -204,22 +246,18 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +  
 +  // Must leave at least one item unused to see difference
 +  // Betweeen empty and full
-+  if (left <= 1)
-+  {
++  if (left <= 1) {
 +      queue_overflowed = 1;
 +      {
 +	char *str = "*************** overflow famqueue ****************\n";
-+	write (0, str, strlen(str));
++	write (STDERR_FILENO, str, strlen(str));
 +      }
-+  }
-+  else
-+  {
++  } else {
 +      change_queue[queue_tail] = si->si_fd;
 +      queue_tail = (queue_tail + 1) % QUEUESIZE;
 +  }
 +  
-+  if (!queue_changed)
-+  {
++  if (!queue_changed) {
 +      queue_changed = 1;
 +      // Trigger the read handler
 +      write(pipe_write_fd, &c, 1);
@@ -229,14 +267,13 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +bool
 +DNotify::is_active()
 +{
-+    if (pipe_read_fd == -2)
-+    {
++    if (pipe_read_fd == -2) {
 +        int filedes[2];
 +	int res;
 +	
 +	res = pipe (filedes);
-+	if (res >= 0)
-+	{   Log::debug("opened pipe");
++	if (res >= 0) {
++	    Log::debug("opened pipe");
 +   	    pipe_read_fd = filedes[0];
 +   	    pipe_write_fd = filedes[1];
 +
@@ -267,15 +304,14 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +
 +  p = dir_hashchain (fd);
 +
-+  while (*p)
-+    {
++  while (*p) {
 +      w = *p;
 +
 +      if (w->fd == fd)
-+	return w;
++	  return w;
 +
 +      p = &w->hash_link;
-+    }
++  }
 +  
 +  return *p;
 +}
@@ -288,18 +324,16 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +  DirWatch *p;
 +  int i;
 +
-+  for (i=0;i<DIR_HASHSIZE;i++)
-+    {
++  for (i=0;i<DIR_HASHSIZE;i++) {
 +      p = dir_hash[i];
 +      
-+      while (p)
-+	{
++      while (p) {
 +	  if (p->dir_dev == dir_dev && p->dir_ino == dir_ino)
-+	    return p;
++	      return p;
 +	  
 +	  p = p->hash_link;
-+	}
-+    }
++      }
++  }
 +  
 +  return NULL;
 +}
@@ -312,15 +346,14 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +
 +  p = file_hashchain (dev, ino);
 +
-+  while (*p)
-+    {
++  while (*p) {
 +      w = *p;
-+
++      
 +      if (w->file_dev == dev && w->file_ino == ino)
-+	return w;
++	  return w;
 +
 +      p = &w->hash_link;
-+    }
++  }
 +  
 +  return *p;
 +}
@@ -330,10 +363,10 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +void
 +DNotify::hash_dirwatch(DirWatch *w)
 +{
-+  DirWatch **p;
-+  p = dir_hashchain (w->fd);
-+  w->hash_link = *p;
-+  *p = w;
++    DirWatch **p;
++    p = dir_hashchain (w->fd);
++    w->hash_link = *p;
++    *p = w;
 +}
 +
 +// Make sure w is not already in the hash table before calling
@@ -341,10 +374,10 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +void
 +DNotify::hash_filewatch(FileWatch *w)
 +{
-+  FileWatch **p;
-+  p = file_hashchain (w->file_dev, w->file_ino);
-+  w->hash_link = *p;
-+  *p = w;
++    FileWatch **p;
++    p = file_hashchain (w->file_dev, w->file_ino);
++    w->hash_link = *p;
++    *p = w;
 +}
 +
 +void
@@ -354,15 +387,13 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +  
 +  p = dir_hashchain (w->fd);
 +  
-+  while (*p)
-+    {
-+      if (*p == w)
-+	{
++  while (*p) {
++      if (*p == w) {
 +	  *p = w->hash_link;
 +	  break;
-+	}
++      }
 +      p = &(*p)->hash_link;
-+    }
++  }
 +  w->hash_link = NULL;
 +}
 +
@@ -373,76 +404,71 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +  
 +  p = file_hashchain (w->file_dev, w->file_ino);
 +  
-+  while (*p)
-+    {
-+      if (*p == w)
-+	{
++  while (*p) {
++      if (*p == w) {
 +	  *p = w->hash_link;
 +	  break;
-+	}
++      }
 +      p = &(*p)->hash_link;
-+    }
++  }
 +  w->hash_link = NULL;
 +}
 +
 +DNotify::Status
 +DNotify::watch_dir(const char *notify_dir, dev_t file_dev, ino_t file_ino)
 +{
-+  struct stat stat;
-+  dev_t dir_dev;
-+  ino_t dir_ino;
-+  DirWatch *dwatch;
-+  FileWatch **p;
-+  FileWatch *fw;
++    struct stat stat;
++    dev_t dir_dev;
++    ino_t dir_ino;
++    DirWatch *dwatch;
++    FileWatch *fw;
 +    
-+  if (lstat (notify_dir, &stat) == -1)
-+      return BAD;
-+  
-+  dwatch = lookup_dirwatch(stat.st_dev, stat.st_ino);
-+  if (!dwatch)
-+    {
-+      Log::debug ("New DirWatch for %s (%x %x)\n",
-+		  notify_dir, (int)stat.st_dev, (int)stat.st_ino);
-+      dwatch = new DirWatch;
-+      dwatch->watches = NULL;
-+      dwatch->hash_link = NULL;
-+      dwatch->dir_dev = stat.st_dev;
-+      dwatch->dir_ino = stat.st_ino;
-+      
-+      dwatch->fd = open(notify_dir, O_RDONLY);
-+      fcntl (dwatch->fd, F_SETSIG, SIGRTMIN);
-+      fcntl (dwatch->fd, F_NOTIFY,
-+	     (DN_MODIFY|DN_CREATE|DN_DELETE|DN_RENAME|DN_ATTRIB) | DN_MULTISHOT);
-+      hash_dirwatch (dwatch);
++    if (lstat (notify_dir, &stat) == -1)
++	return BAD;
++    
++    dwatch = lookup_dirwatch(stat.st_dev, stat.st_ino);
++    if (!dwatch) {
++	Log::debug ("New DirWatch for %s (%x %x)\n",
++		    notify_dir, (int)stat.st_dev, (int)stat.st_ino);
++	dwatch = new DirWatch;
++	dwatch->hash_link = NULL;
++	dwatch->dir_dev = stat.st_dev;
++	dwatch->dir_ino = stat.st_ino;
++	dwatch->fd = open(notify_dir, O_RDONLY);
++	fcntl (dwatch->fd, F_SETSIG, SIGRTMIN);
++	fcntl (dwatch->fd, F_NOTIFY,
++	       (DN_MODIFY|DN_CREATE|DN_DELETE|DN_RENAME|DN_ATTRIB) | DN_MULTISHOT);
++	hash_dirwatch (dwatch);
 +    }
-+
-+  for (p=&dwatch->watches; *p; p=&(*p)->next)
-+    {
-+      fw = *p;
-+      if (fw->file_dev == file_dev && fw->file_ino == file_ino)
++    
++    fw = lookup_filewatch(file_dev, file_ino);
++    if (fw)  {
++	if (!fw->has_dir_watch(dwatch)) {
++	    fw->add_dir_watch(dwatch);
++	    dwatch->file_watches.prepend(fw);
++	}
 +	return OK;
 +    }
-+  
-+  // No old FileWatch, need to add one:
-+  Log::debug("New FileWatch for %x %x\n", (int)file_dev, (int)file_ino);
-+  *p = new FileWatch;
-+  fw = *p;
-+  fw->next = NULL;
-+  fw->file_dev = file_dev;
-+  fw->file_ino = file_ino;
-+  fw->dir_watch = dwatch;
-+  hash_filewatch(fw);
-+  return OK;
++    
++    // No old FileWatch, need to add one:
++    Log::debug("New FileWatch for %x %x\n", (int)file_dev, (int)file_ino);
++    fw = new FileWatch;
++    fw->add_dir_watch(dwatch);
++    dwatch->file_watches.prepend(fw);
++    fw->file_dev = file_dev;
++    fw->file_ino = file_ino;
++    hash_filewatch(fw);
++    return OK;
 +}
 +
 +char *
 +dirname_dup (const char *name)
 +{
-+  char *copy = strdup(name);
-+  char *res = dirname(copy);
-+  res = strdup(res);
-+  free (copy);
-+  return res;
++    char *copy = strdup(name);
++    char *res = dirname(copy);
++    res = strdup(res);
++    free (copy);
++    return res;
 +}
 +
 +DNotify::Status
@@ -510,6 +536,7 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +{
 +    FileWatch *fwatch;
 +    DirWatch *dwatch;
++    int i;
 +    
 +    Log::debug("revoke() name: %s, dev: %x, ino: %x\n", name, dev, ino);
 +
@@ -520,31 +547,24 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +    fwatch = lookup_filewatch (dev, ino);
 +    if (fwatch == NULL)
 +	return BAD;
-+    
-+    dwatch = fwatch->dir_watch;
-+    
++
 +    // delete FileWatch, if last FileWatch: close fd, delete DirWatch
 +    Log::debug ("Destroying FileWatch for (%x %x)\n",
 +		(int)fwatch->file_dev, (int)fwatch->file_ino);
-+    FileWatch **p;
-+    for (p=&dwatch->watches; *p; p=&(*p)->next)
-+    {
-+      if (*p == fwatch)
-+	{
-+	  *p = (*p)->next;
-+	  break;
++    for (i = 0; i < fwatch->n_dir_watches; i++) {
++	dwatch = fwatch->dir_watch[i];
++	dwatch->file_watches.remove (fwatch);
++
++	if (dwatch->file_watches.empty()) {
++	    Log::debug ("Destroying DirWatch for (%x %x)\n",
++			(int)dwatch->dir_dev, (int)dwatch->dir_ino);
++	    close(dwatch->fd);
++	    unhash_dirwatch(dwatch);
++	    delete dwatch;
 +	}
 +    }
 +    unhash_filewatch(fwatch);
 +    delete fwatch;
-+    if (dwatch->watches == NULL)
-+      {
-+	Log::debug ("Destroying DirWatch for (%x %x)\n",
-+		    (int)dwatch->dir_dev, (int)dwatch->dir_ino);
-+	close(dwatch->fd);
-+	unhash_dirwatch(dwatch);
-+	delete dwatch;
-+      }
 +  
 +    return OK;
 +}
@@ -556,11 +576,9 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +  int i;
 +  FileWatch *fw;
 +
-+  for (i=0; i<FILE_HASHSIZE; i++)
-+  {
++  for (i=0; i<FILE_HASHSIZE; i++) {
 +      fw = file_hash[i];
-+      while (fw)
-+      {
++      while (fw) {
 +	  (*ehandler)(fw->file_dev, fw->file_ino, CHANGE);
 +
 +	  fw = fw->hash_link;
@@ -582,8 +600,7 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +    queue_changed = 0;
 +    if (rc < 0)
 +        Log::perror("pipe read");
-+    else if (queue_overflowed)
-+    {
++    else if (queue_overflowed) {
 +	  // There is a *slight* race condition here. Between reading
 +	  // the queue_overflow flag and resetting it. But it doesn't
 +	  // matter, since I'm gonna handle the overflow after reseting
@@ -595,31 +612,43 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +	  queue_head = queue_tail;
 +	  
 +	  all_watches_changed ();
-+    }
-+    else
-+    {
++    } else {
 +	// Don't read events that happen later than
 +	// the initial read. (Otherwise skipping fd's
 +	// might miss some changes).
 +	snap_queue_tail = queue_tail;
 +	last_fd = -1;
-+	while (queue_head != snap_queue_tail)
-+	{
++	while (queue_head != snap_queue_tail) {
 +	    fd = change_queue[queue_head];
 +	    queue_head = (queue_head + 1) % QUEUESIZE;
 +
 +	    // Skip multiple changes to the same fd
-+	    if (fd != last_fd)
-+	    {
++	    if (fd != last_fd) {
 +		dw = lookup_dirwatch (fd);
-+		if (dw)
-+		{
++		if (dw)	{
++		    int n_watches, i;
++		    ChangeEventData *data;
++		    DirWatch::FileWatchList::Node *n;
++		    
 +		    Log::debug("dnotify said dev %d/%d, ino %ld changed",
 +			       major(dw->dir_dev), minor(dw->dir_dev), dw->dir_ino);
-+		    for (fw=dw->watches; fw; fw=fw->next)
-+		    {
-+			(*ehandler)(fw->file_dev, fw->file_ino, CHANGE);
++		    
++		    n_watches = dw->file_watches.len();
++		    data = new ChangeEventData[n_watches];
++		    
++		    i = 0;
++		    for (n=dw->file_watches.first; n; n=n->next) {
++			data[i].file_dev = n->watch->file_dev;
++			data[i].file_ino = n->watch->file_ino;
++			i++;
 +		    }
++		    assert(i == n_watches);
++		    
++		    for (i = 0; i < n_watches; i++) {
++			(*ehandler)(data[i].file_dev, data[i].file_ino, CHANGE);
++		    }
++		    
++		    delete[] data;
 +		}
 +	    }
 +	    last_fd = fd;
@@ -627,10 +656,9 @@ diff -urP orig/fam/DNotify.c++ dnotify/fam/DNotify.c++
 +    }
 +}
 +
-diff -urP orig/fam/DNotify.h dnotify/fam/DNotify.h
---- orig/fam/DNotify.h	Wed Dec 31 19:00:00 1969
-+++ dnotify/fam/DNotify.h	Thu Nov 29 18:18:10 2001
-@@ -0,0 +1,97 @@
+--- /dev/null	2003-09-15 15:40:47.000000000 +0200
++++ fam-2.6.10/fam/DNotify.h	2004-02-03 18:30:26.000000000 +0100
+@@ -0,0 +1,98 @@
 +//  Copyright (C) 2001 Red Hat, Inc.  All Rights Reserved.
 +//  Copyright (C) 1999 Silicon Graphics, Inc.  All Rights Reserved.
 +//
@@ -685,6 +713,7 @@ diff -urP orig/fam/DNotify.h dnotify/fam/DNotify.h
 +private:
 +    struct FileWatch;
 +    struct DirWatch;
++    struct ChangeEventData;
 +  
 +    //  Class Variables
 +    enum { QUEUESIZE = 1024 };
@@ -700,9 +729,9 @@ diff -urP orig/fam/DNotify.h dnotify/fam/DNotify.h
 +    static void signal_handler(int sig, siginfo_t *si, void *data);
 +    static void read_handler(int fd, void *closure);
 + 
-+    enum { DIR_HASHSIZE = 257 };
++    enum { DIR_HASHSIZE = 367 };
 +    static DirWatch *dir_hash[DIR_HASHSIZE];
-+    enum { FILE_HASHSIZE = 257 };
++    enum { FILE_HASHSIZE = 823 };
 +    static FileWatch *file_hash[FILE_HASHSIZE];
 +
 +    static DirWatch **dir_hashchain(int fd)
@@ -728,9 +757,8 @@ diff -urP orig/fam/DNotify.h dnotify/fam/DNotify.h
 +#endif /* !IMon_included */
 +
 +
-diff -urP orig/fam/IMon.h dnotify/fam/IMon.h
---- orig/fam/IMon.h	Mon Oct 22 02:33:10 2001
-+++ dnotify/fam/IMon.h	Thu Nov 29 18:18:10 2001
+--- fam-2.6.10/fam/IMon.h.dnotify	2003-04-15 06:21:34.000000000 +0200
++++ fam-2.6.10/fam/IMon.h	2004-02-03 18:30:26.000000000 +0100
 @@ -24,10 +24,7 @@
  #define IMon_included
  
@@ -772,10 +800,9 @@ diff -urP orig/fam/IMon.h dnotify/fam/IMon.h
      //  Class Variables
  
      static int imonfd;
-diff -urP orig/fam/Interest.c++ dnotify/fam/Interest.c++
---- orig/fam/Interest.c++	Mon Oct 22 02:33:10 2001
-+++ dnotify/fam/Interest.c++	Thu Nov 29 18:19:59 2001
-@@ -41,12 +41,21 @@
+--- fam-2.6.10/fam/Interest.c++.dnotify	2003-04-15 06:21:34.000000000 +0200
++++ fam-2.6.10/fam/Interest.c++	2004-02-03 18:30:26.000000000 +0100
+@@ -43,12 +43,21 @@
  #include "Event.h"
  #include "FileSystem.h"
  #include "IMon.h"
@@ -798,7 +825,7 @@ diff -urP orig/fam/Interest.c++ dnotify/fam/Interest.c++
  bool      Interest::xtab_verification = true;
  
  Interest::Interest(const char *name, FileSystem *fs, in_addr host, ExportVerification ev)
-@@ -58,11 +67,11 @@
+@@ -60,11 +69,11 @@
        myhost(host),
        mypath_exported_to_host(ev == NO_VERIFY_EXPORTED)
  {
@@ -815,7 +842,7 @@ diff -urP orig/fam/Interest.c++ dnotify/fam/Interest.c++
      {   int rc = lstat(name, &old_stat);
  	if (rc < 0)
  	{   Log::info("can't lstat %s", name);
-@@ -99,7 +108,7 @@
+@@ -101,7 +110,7 @@
      }
  #endif
  
@@ -824,7 +851,7 @@ diff -urP orig/fam/Interest.c++ dnotify/fam/Interest.c++
  }
  
  Interest::~Interest()
-@@ -127,7 +136,7 @@
+@@ -129,7 +138,7 @@
  		pp = &p->hashlink;	// move to next element
  	    }
  	if (!found_same)
@@ -833,7 +860,7 @@ diff -urP orig/fam/Interest.c++ dnotify/fam/Interest.c++
      }
  }
  
-@@ -146,7 +155,7 @@
+@@ -148,7 +157,7 @@
  
          // Express interest.
          IMon::Status s = IMon::BAD;
@@ -842,7 +869,7 @@ diff -urP orig/fam/Interest.c++ dnotify/fam/Interest.c++
          if (s != IMon::OK) {
              return true;
          }
-@@ -242,23 +251,23 @@
+@@ -249,23 +258,23 @@
  }
  
  void
@@ -870,9 +897,8 @@ diff -urP orig/fam/Interest.c++ dnotify/fam/Interest.c++
  		p->scan();
  	    }
  	}
-diff -urP orig/fam/Interest.h dnotify/fam/Interest.h
---- orig/fam/Interest.h	Mon Oct 22 02:33:10 2001
-+++ dnotify/fam/Interest.h	Thu Nov 29 18:18:10 2001
+--- fam-2.6.10/fam/Interest.h.dnotify	2003-04-15 06:21:34.000000000 +0200
++++ fam-2.6.10/fam/Interest.h	2004-02-03 18:30:26.000000000 +0100
 @@ -32,7 +32,7 @@
  
  class Event;
@@ -900,9 +926,8 @@ diff -urP orig/fam/Interest.h dnotify/fam/Interest.h
      static Interest *hashtable[HASHSIZE];
      static bool xtab_verification;
  
-diff -urP orig/fam/Makefile.am dnotify/fam/Makefile.am
---- orig/fam/Makefile.am	Mon Oct 22 02:33:10 2001
-+++ dnotify/fam/Makefile.am	Thu Nov 29 18:18:10 2001
+--- fam-2.6.10/fam/Makefile.am.dnotify	2003-04-15 06:21:26.000000000 +0200
++++ fam-2.6.10/fam/Makefile.am	2004-02-03 18:30:26.000000000 +0100
 @@ -3,6 +3,12 @@
  bin_PROGRAMS = fam
  sysconf_DATA = fam.conf
@@ -945,9 +970,8 @@ diff -urP orig/fam/Makefile.am dnotify/fam/Makefile.am
  
  fam_LDADD = -lrpcsvc $(top_srcdir)/support/libsupport.a
  
-diff -urP orig/fam/Monitor.h dnotify/fam/Monitor.h
---- orig/fam/Monitor.h	Wed Dec 31 19:00:00 1969
-+++ dnotify/fam/Monitor.h	Thu Nov 29 18:18:10 2001
+--- /dev/null	2003-09-15 15:40:47.000000000 +0200
++++ fam-2.6.10/fam/Monitor.h	2004-02-03 18:30:26.000000000 +0100
 @@ -0,0 +1,57 @@
 +//  Copyright (C) 2001 Red Hat, Inc.  All Rights Reserved.
 +//  Copyright (C) 1999 Silicon Graphics, Inc.  All Rights Reserved.
@@ -1006,10 +1030,9 @@ diff -urP orig/fam/Monitor.h dnotify/fam/Monitor.h
 +};
 +
 +#endif /* !Monitor_included */
-diff -urP orig/include/BTree.h dnotify/include/BTree.h
---- orig/include/BTree.h	Wed Nov  7 23:09:50 2001
-+++ dnotify/include/BTree.h	Thu Nov 29 18:18:10 2001
-@@ -272,7 +272,7 @@
+--- fam-2.6.10/include/BTree.h.dnotify	2003-04-15 06:21:19.000000000 +0200
++++ fam-2.6.10/include/BTree.h	2004-02-03 18:30:26.000000000 +0100
+@@ -271,7 +271,7 @@
      n += that->n + 1;
      link[n] = that->link[that->n];
      that->n = 0;
@@ -1018,7 +1041,7 @@ diff -urP orig/include/BTree.h dnotify/include/BTree.h
  }
  
  ///////////////////////////////////////////////////////////////////////////////
-@@ -281,7 +281,7 @@
+@@ -280,7 +280,7 @@
  
  template <class K, class V>
  BTree<K, V>::BTree()
@@ -1027,7 +1050,7 @@ diff -urP orig/include/BTree.h dnotify/include/BTree.h
  {
      assert(!(fanout % 2));
  }
-@@ -408,7 +408,7 @@
+@@ -407,7 +407,7 @@
  BTree<Key, Value>::Closure
  BTree<Key, Value>::insert(Node *p, const Key& key, const Value& value)
  {
@@ -1036,7 +1059,7 @@ diff -urP orig/include/BTree.h dnotify/include/BTree.h
      //  If you're running Purify on a client linking with libfam, and it says
      //  that line is causing a 3-byte UMR for BTree<int, bool>::insert() in
      //  FAMNextEvent() ("Reading 8 bytes from 0x... on the stack (3 bytes at
-@@ -476,7 +476,7 @@
+@@ -475,7 +475,7 @@
      case UNDER:
  	if (root->n == 0)
  	{   Node *nr = root->link[0];
@@ -1045,7 +1068,7 @@ diff -urP orig/include/BTree.h dnotify/include/BTree.h
  	    delete root;
  	    root = nr;
  	}
-@@ -508,8 +508,8 @@
+@@ -507,8 +507,8 @@
      Node *cp = p->link[i];
      assert(cp);
      
@@ -1056,3 +1079,69 @@ diff -urP orig/include/BTree.h dnotify/include/BTree.h
      assert(!rp || rp->n >= fanout / 2);
      assert(!lp || lp->n >= fanout / 2);
  
+--- fam-2.6.10/acconfig.h.dnotify	2003-04-15 06:20:36.000000000 +0200
++++ fam-2.6.10/acconfig.h	2004-02-03 18:30:26.000000000 +0100
+@@ -17,6 +17,9 @@
+ /*  Define if the system has imon and IMONIOC_ ioctl flags.  */
+ #undef HAVE_IMON
+ 
++/*  Define if the system has the dnotify fcntl and it's gonna be used.  */
++#undef USE_DNOTIFY
++
+ /*  Define if the system has the struct revokdi and the IMONIOC_REVOKDI
+ **  ioctl flag.  (IRIX 5.3 doesn't.)
+ */
+--- fam-2.6.10/configure.in.dnotify	2003-04-15 08:05:00.000000000 +0200
++++ fam-2.6.10/configure.in	2004-02-03 18:30:26.000000000 +0100
+@@ -100,6 +100,24 @@
+ dnl AC_CHECK_HEADERS(fcntl.h limits.h sys/time.h syslog.h unistd.h)
+ 
+ dnl
++dnl  Test for the linux dnotify fcntl
++dnl
++AC_MSG_CHECKING([for dnotify fcntl support])
++fam_save_cppflags="$CPPFLAGS"
++CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
++AC_TRY_COMPILE([
++#define _GNU_SOURCE  
++#include <fcntl.h>
++#include <unistd.h>
++],
++[ int fd = 1;
++  fcntl (fd, F_NOTIFY, (DN_MODIFY|DN_CREATE|DN_DELETE|DN_RENAME|DN_ATTRIB)|DN_MULTISHOT);
++], have_dnotify=yes, have_dnotify=no)
++use_dnotify=false
++CPPFLAGS="$pango_save_cppflags"
++AC_MSG_RESULT($have_dnotify)
++
++dnl
+ dnl  See if imon is available; if so, is it IRIX or Linux?
+ dnl
+ if test `uname` = 'IRIX' || test `uname` = 'IRIX64'; then
+@@ -122,11 +140,17 @@
+ if test "$have_imon" != "yes"; then
+     have_imon=no
+     AC_DEFINE(HAVE_IMON, 0)
++    if test "$have_dnotify" = "yes"; then
++        AC_DEFINE(USE_DNOTIFY)
++	use_dnotify=true
++    fi
+     IMON_FUNCS=IMonNone
+ fi
++AM_CONDITIONAL(USE_DNOTIFY, $use_dnotify)
+ AC_SUBST(IMON_FUNCS)
+ echo "Using imon support module $IMON_FUNCS"
+ 
++
+ AC_CHECK_HEADER(sys/statvfs.h, [AC_DEFINE(HAVE_STATVFS, 1) have_statvfs="yes"], [AC_DEFINE(HAVE_STATVFS, 0) have_statvfs="no"])
+ AC_CHECK_HEADER(sys/syssgi.h,  AC_DEFINE(HAVE_SYSSGI,  1), AC_DEFINE(HAVE_SYSSGI,  0))
+ AC_CHECK_HEADER(sys/fs/nfs_clnt.h, AC_DEFINE(HAVE_SYS_FS_NFS_CLNT_H, 1), AC_DEFINE(HAVE_SYS_FS_NFS_CLNT_H, 0))
+@@ -570,7 +594,7 @@
+ dnl 
+ dnl  fam is a good deal less interesting without imon.
+ dnl 
+-if test "$have_imon" != 'yes'; then
++if test "$have_imon" != 'yes' -a "$have_dnotify" != 'yes'; then
+     cat << EOF
+ 
+   ******************************************************************
