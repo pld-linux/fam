@@ -5,11 +5,6 @@ Version:	2.6.7
 Release:	1
 License:	GPL/LGPL
 Group:		Networking/Daemons
-Group(de):	Netzwerkwesen/Server
-Group(es):	Red/Servidores
-Group(fr):	RИseau/Serveurs
-Group(pl):	Sieciowe/Serwery
-Group(pt):	Rede/Server
 Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
 Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-build.patch
@@ -38,14 +33,6 @@ informacji o zmianach w okre╤lonych plikach lub katalogach.
 Summary:	Libraries for FAM
 Summary(pl):	Biblioteki FAMa
 Group:		Libraries
-Group(de):	Bibliotheken
-Group(es):	Bibliotecas
-Group(fr):	Librairies
-Group(pl):	Biblioteki
-Group(pt):	Bibliotecas
-Group(pt_BR):	Bibliotecas
-Group(ru):	Библиотеки
-Group(uk):	Б╕бл╕отеки
 Obsoletes:	libfam0
 
 %description libs
@@ -58,14 +45,6 @@ Biblioteki FAMa.
 Summary:	Includes to develop using FAM
 Summary(pl):	Pliki nagЁСwkowe FAM
 Group:		Development/Libraries
-Group(de):	Entwicklung/Bibliotheken
-Group(es):	Desarrollo/Bibliotecas
-Group(fr):	Development/Librairies
-Group(pl):	Programowanie/Biblioteki
-Group(pt_BR):	Desenvolvimento/Bibliotecas
-Group(pt):	Desenvolvimento/Bibliotecas
-Group(ru):	Разработка/Библиотеки
-Group(uk):	Розробка/Б╕бл╕отеки
 Requires:	%{name}-libs
 Obsoletes:	libfam0-devel
 
@@ -79,14 +58,6 @@ Pliki nagЁСwkowe FAM.
 Summary:	FAM static libraries
 Summary(pl):	Biblioteki statyczne FAM
 Group:		Development/Libraries
-Group(de):	Entwicklung/Bibliotheken
-Group(es):	Desarrollo/Bibliotecas
-Group(fr):	Development/Librairies
-Group(pl):	Programowanie/Biblioteki
-Group(pt_BR):	Desenvolvimento/Bibliotecas
-Group(pt):	Desenvolvimento/Bibliotecas
-Group(ru):	Разработка/Библиотеки
-Group(uk):	Розробка/Б╕бл╕отеки
 Requires:	%{name}
 
 %description static
