@@ -1,13 +1,13 @@
 # TODO:
-# - add rc-inetd suport for fam service.
+# - add rc-inetd support for fam service.
 #
 Summary:	Fam, the File Alteration Monitor
 Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.6.9
-Release:	1
-License:	LGPL
+Release:	2
+License:	GPL
 Group:		Networking/Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/%{name}-%{version}.tar.gz
 Patch0:		%{name}-dnotify.patch
