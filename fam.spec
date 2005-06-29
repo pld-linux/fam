@@ -1,14 +1,16 @@
-Summary:	Fam, the File Alteration Monitor
+Summary:	FAM, the File Alteration Monitor
 Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.6.10
-Release:	2
+Release:	2.2
 License:	GPL
-Group:		Networking/Daemons
+Group:		Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
 # Source0-md5:	1c5a2ea659680bdd1e238d7828a857a7
 Source1:	%{name}.inetd
+Source2:	%{name}.init
+Source3:	%{name}.sysconfig
 Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpcsvc.patch
@@ -19,53 +21,76 @@ BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
-Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-fam, the File Alteration Monitor, provides a daemon and an API which
+FAM, the File Alteration Monitor, provides a daemon and an API which
 applications can use to be notified when specific files or directories
 are changed.
 
 %description -l pl
-fam dostarcza serwer i API pozwalaj±ce aplikacjom na uzyskiwanie
+FAM dostarcza serwer i API pozwalaj±ce aplikacjom na uzyskiwanie
 informacji o zmianach w okre¶lonych plikach lub katalogach.
 
 %description -l pt_BR
-O fam fornece um servidor e uma API que aplicações podem usar para
+O FAM fornece um servidor e uma API que aplicações podem usar para
+receber notificações sobre mudanças em arquivos ou diretórios
+específicos.
+
+%package common
+Summary:	FAM, the File Alteration Monitor - common files
+Summary(pl):	Monitor zmian w plikach - wspólne pliki
+Group:		Daemons
+Prereq:		portmap
+Requires:	%{name}-libs = %{version}-%{release}
+Obsoletes:	fam <= 0:2.6.10-2
+
+%description common
+FAM, the File Alteration Monitor, provides a daemon and an API which
+applications can use to be notified when specific files or directories
+are changed.
+
+%description common -l pl
+FAM dostarcza serwer i API pozwalaj±ce aplikacjom na uzyskiwanie
+informacji o zmianach w okre¶lonych plikach lub katalogach.
+
+%description common -l pt_BR
+O FAM fornece um servidor e uma API que aplicações podem usar para
 receber notificações sobre mudanças em arquivos ou diretórios
 específicos.
 
 %package inetd
-Summary:	inetd configs for fam
-Summary(pl):	Pliki konfiguracyjne do u¿ycia fam poprzez inetd
+Summary:	inetd configs for FAM
+Summary(pl):	Pliki konfiguracyjne do u¿ycia FAM poprzez inetd
 Group:		Daemons
 PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
 PreReq:		rc-inetd
 Requires:	inetdaemon
 Requires:	portmap
+Obsoletes:	fam-standalone
 Conflicts:	rlinetd
 Conflicts:	inetd
 #Requires:	xinetd
 
 %description inetd
-Fam configs for running from inetd.
+FAM configs for running from inetd.
 
 %description inetd -l pl
-Pliki konfiguracyjna fam do startowania demona poprzez inetd.
+Pliki konfiguracyjna FAM do startowania demona poprzez inetd.
 
 %package standalone
-Summary:	Standalone daemon configs for fam
-Summary(pl):	Pliki konfiguracyjne do startowania fam w trybie standalone
+Summary:	Standalone daemon configs for FAM
+Summary(pl):	Pliki konfiguracyjne do startowania FAM w trybie standalone
 Group:		Daemons
 PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
 PreReq:		rc-scripts
+Obsoletes:	fam-inetd
 
 %description standalone
-Fam configs for running as a standalone daemon.
+FAM configs for running as a standalone daemon.
 
 %description standalone -l pl
-Pliki konfiguracyjne fam do startowania demona w trybie
+Pliki konfiguracyjne FAM do startowania demona w trybie
 standalone.
 
 %package libs
@@ -141,38 +166,64 @@ CXXFLAGS="%{rpmcflags} -fno-rtti -fno-exceptions"
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT/etc/sysconfig/rc-inetd
+install -d $RPM_BUILD_ROOT/etc/{sysconfig/rc-inetd,rc.d/init.d}
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/rc-inetd/sgi_fam
+install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/fam
+install %{SOURCE3} $RPM_BUILD_ROOT/etc/sysconfig/fam
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post
+%post inetd
 if [ -f /var/lock/subsys/rc-inetd ]; then
 	/etc/rc.d/init.d/rc-inetd reload 1>&2
 else
 	echo "Type \"/etc/rc.d/init.d/rc-inetd start\" to start inet server" 1>&2
 fi
 
-%postun
+%postun inetd
 if [ -f /var/lock/subsys/rc-inetd ]; then
 	/etc/rc.d/init.d/rc-inetd reload
+fi
+
+%post standalone
+/sbin/chkconfig --add fam
+if [ -f /var/lock/subsys/fam ]; then
+	/etc/rc.d/init.d/fam restart 1>&2
+else
+	echo "Run \"/etc/rc.d/init.d/fam start\" to start FAM daemon."
+fi
+
+%preun standalone
+if [ "$1" = "0" ]; then
+	if [ -f /var/lock/subsys/fam ]; then
+		/etc/rc.d/init.d/fam stop 1>&2
+	fi
+	/sbin/chkconfig --del fam
 fi
 
 %post	libs -p /sbin/ldconfig
 %postun	libs -p /sbin/ldconfig
 
-%files
+%files common
 %defattr(644,root,root,755)
 %doc AUTHORS ChangeLog NEWS README TODO
 %attr(755,root,root) %{_bindir}/*
 %config %{_sysconfdir}/%{name}.conf
-%attr(640,root,root) /etc/sysconfig/rc-inetd/sgi_fam
 %{_mandir}/man1/fam.1m*
+
+%files inetd
+%defattr(644,root,root,755)
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/rc-inetd/sgi_fam
+
+%files standalone
+%defattr(644,root,root,755)
+%attr(640,root,root) %config(noreplace) %verify(not size mtime md5) /etc/sysconfig/fam
+%attr(754,root,root) /etc/rc.d/init.d/fam
 
 %files libs
 %defattr(644,root,root,755)
