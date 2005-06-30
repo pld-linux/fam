@@ -1,5 +1,5 @@
 --- /dev/null	2003-09-15 15:40:47.000000000 +0200
-+++ fam-2.6.10/fam/DNotify.c++	2004-02-04 11:13:04.000000000 +0100
++++ fam-2.6.10/src/DNotify.c++	2004-02-04 11:13:04.000000000 +0100
 @@ -0,0 +1,655 @@
 +//  Copyright (C) 2001 Red Hat, Inc.  All Rights Reserved.
 +//  Copyright (C) 1999 Silicon Graphics, Inc.  All Rights Reserved.
@@ -657,7 +657,7 @@
 +}
 +
 --- /dev/null	2003-09-15 15:40:47.000000000 +0200
-+++ fam-2.6.10/fam/DNotify.h	2004-02-03 18:30:26.000000000 +0100
++++ fam-2.6.10/src/DNotify.h	2004-02-03 18:30:26.000000000 +0100
 @@ -0,0 +1,98 @@
 +//  Copyright (C) 2001 Red Hat, Inc.  All Rights Reserved.
 +//  Copyright (C) 1999 Silicon Graphics, Inc.  All Rights Reserved.
@@ -757,8 +757,8 @@
 +#endif /* !IMon_included */
 +
 +
---- fam-2.6.10/fam/IMon.h.dnotify	2003-04-15 06:21:34.000000000 +0200
-+++ fam-2.6.10/fam/IMon.h	2004-02-03 18:30:26.000000000 +0100
+--- fam-2.6.10/src/IMon.h.dnotify	2003-04-15 06:21:34.000000000 +0200
++++ fam-2.6.10/src/IMon.h	2004-02-03 18:30:26.000000000 +0100
 @@ -24,10 +24,7 @@
  #define IMon_included
  
@@ -800,8 +800,8 @@
      //  Class Variables
  
      static int imonfd;
---- fam-2.6.10/fam/Interest.c++.dnotify	2003-04-15 06:21:34.000000000 +0200
-+++ fam-2.6.10/fam/Interest.c++	2004-02-03 18:30:26.000000000 +0100
+--- fam-2.6.10/src/Interest.c++.dnotify	2003-04-15 06:21:34.000000000 +0200
++++ fam-2.6.10/src/Interest.c++	2004-02-03 18:30:26.000000000 +0100
 @@ -43,12 +43,21 @@
  #include "Event.h"
  #include "FileSystem.h"
@@ -897,8 +897,8 @@
  		p->scan();
  	    }
  	}
---- fam-2.6.10/fam/Interest.h.dnotify	2003-04-15 06:21:34.000000000 +0200
-+++ fam-2.6.10/fam/Interest.h	2004-02-03 18:30:26.000000000 +0100
+--- fam-2.6.10/src/Interest.h.dnotify	2003-04-15 06:21:34.000000000 +0200
++++ fam-2.6.10/src/Interest.h	2004-02-03 18:30:26.000000000 +0100
 @@ -32,7 +32,7 @@
  
  class Event;
@@ -926,11 +926,11 @@
      static Interest *hashtable[HASHSIZE];
      static bool xtab_verification;
  
---- fam-2.6.10/fam/Makefile.am.dnotify	2003-04-15 06:21:26.000000000 +0200
-+++ fam-2.6.10/fam/Makefile.am	2004-02-03 18:30:26.000000000 +0100
+--- fam-2.6.10/src/Makefile.am.dnotify	2003-04-15 06:21:26.000000000 +0200
++++ fam-2.6.10/src/Makefile.am	2004-02-03 18:30:26.000000000 +0100
 @@ -3,6 +3,12 @@
- bin_PROGRAMS = fam
- sysconf_DATA = fam.conf
+ 
+ sbin_PROGRAMS = famd
  
 +if USE_DNOTIFY
 +DNOTIFY_FILES = DNotify.c++
@@ -938,7 +938,7 @@
 +DNOTIFY_FILES =
 +endif
 +
- fam_SOURCES = \
+ famd_SOURCES = \
    Activity.c++ \
    Activity.h \
 @@ -20,6 +26,7 @@
@@ -957,21 +957,19 @@
    Pollster.c++ \
    Pollster.h \
    Request.h \
-@@ -72,9 +80,10 @@
+@@ -72,7 +80,8 @@
    main.c++ \
    timeval.c++ \
    timeval.h \
--  @IMON_FUNCS@.c++
-+  @IMON_FUNCS@.c++ \
+-  @MONITOR_FUNCS@.c++
++  @MONITOR_FUNCS@.c++ \
 +  $(DNOTIFY_FILES)
  
--EXTRA_fam_SOURCES = IMonIrix.c++ IMonLinux.c++ IMonNone.c++
-+EXTRA_fam_SOURCES = IMonIrix.c++ IMonLinux.c++ IMonNone.c++ DNotify.c++
- 
- fam_LDADD = -lrpcsvc $(top_srcdir)/support/libsupport.a
+-EXTRA_famd_SOURCES = IMonIrix.c++ IMonLinux.c++ IMonNone.c++
++EXTRA_famd_SOURCES = IMonIrix.c++ IMonLinux.c++ IMonNone.c++ DNotify.c++
  
 --- /dev/null	2003-09-15 15:40:47.000000000 +0200
-+++ fam-2.6.10/fam/Monitor.h	2004-02-03 18:30:26.000000000 +0100
++++ fam-2.6.10/src/Monitor.h	2004-02-03 18:30:26.000000000 +0100
 @@ -0,0 +1,57 @@
 +//  Copyright (C) 2001 Red Hat, Inc.  All Rights Reserved.
 +//  Copyright (C) 1999 Silicon Graphics, Inc.  All Rights Reserved.
@@ -1079,24 +1077,13 @@
      assert(!rp || rp->n >= fanout / 2);
      assert(!lp || lp->n >= fanout / 2);
  
---- fam-2.6.10/acconfig.h.dnotify	2003-04-15 06:20:36.000000000 +0200
-+++ fam-2.6.10/acconfig.h	2004-02-03 18:30:26.000000000 +0100
-@@ -17,6 +17,9 @@
- /*  Define if the system has imon and IMONIOC_ ioctl flags.  */
- #undef HAVE_IMON
- 
-+/*  Define if the system has the dnotify fcntl and it's gonna be used.  */
-+#undef USE_DNOTIFY
-+
- /*  Define if the system has the struct revokdi and the IMONIOC_REVOKDI
- **  ioctl flag.  (IRIX 5.3 doesn't.)
- */
---- fam-2.6.10/configure.in.dnotify	2003-04-15 08:05:00.000000000 +0200
-+++ fam-2.6.10/configure.in	2004-02-03 18:30:26.000000000 +0100
+--- fam-2.6.10/configure.ac.dnotify	2003-04-15 08:05:00.000000000 +0200
++++ fam-2.6.10/configure.ac	2004-02-03 18:30:26.000000000 +0100
 @@ -100,6 +100,24 @@
- dnl AC_CHECK_HEADERS(fcntl.h limits.h sys/time.h syslog.h unistd.h)
+ AC_HEADER_DIRENT
+ AC_CHECK_HEADERS([fcntl.h limits.h linux/imon.h netinet/in.h rpc/rpc.h rpcsvc/mount.h stddef.h stdlib.h string.h syslog.h sys/imon.h sys/param.h sys/select.h sys/statvfs.h sys/syssgi.h sys/time.h sys/types.h sys/un.h unistd.h])
  
- dnl
++dnl
 +dnl  Test for the linux dnotify fcntl
 +dnl
 +AC_MSG_CHECKING([for dnotify fcntl support])
@@ -1114,34 +1101,21 @@
 +CPPFLAGS="$pango_save_cppflags"
 +AC_MSG_RESULT($have_dnotify)
 +
-+dnl
- dnl  See if imon is available; if so, is it IRIX or Linux?
- dnl
- if test `uname` = 'IRIX' || test `uname` = 'IRIX64'; then
-@@ -122,11 +140,17 @@
- if test "$have_imon" != "yes"; then
-     have_imon=no
-     AC_DEFINE(HAVE_IMON, 0)
-+    if test "$have_dnotify" = "yes"; then
-+        AC_DEFINE(USE_DNOTIFY)
-+	use_dnotify=true
-+    fi
-     IMON_FUNCS=IMonNone
+ if test "$have_sys_imon_h"; then
+ 	MONITOR_FUNCS=IMonIRIX
+ elif test "$have_linux_imon_h"; then
+@@ -122,9 +140,14 @@
+ elif test "$have_linux_imon_h"; then
+ 	MONITOR_FUNCS=IMonLinux
+ else
++	if test "$have_dnotify" = "yes"; then
++		use_dnotify=true
++		AC_DEFINE([USE_DNOTIFY], [1], [Define if the system has the dnotify fcntl and it's gonna be used.])
++	fi
+ 	MONITOR_FUNCS=IMonNone
  fi
+ AC_SUBST(MONITOR_FUNCS)
 +AM_CONDITIONAL(USE_DNOTIFY, $use_dnotify)
- AC_SUBST(IMON_FUNCS)
- echo "Using imon support module $IMON_FUNCS"
  
-+
- AC_CHECK_HEADER(sys/statvfs.h, [AC_DEFINE(HAVE_STATVFS, 1) have_statvfs="yes"], [AC_DEFINE(HAVE_STATVFS, 0) have_statvfs="no"])
- AC_CHECK_HEADER(sys/syssgi.h,  AC_DEFINE(HAVE_SYSSGI,  1), AC_DEFINE(HAVE_SYSSGI,  0))
- AC_CHECK_HEADER(sys/fs/nfs_clnt.h, AC_DEFINE(HAVE_SYS_FS_NFS_CLNT_H, 1), AC_DEFINE(HAVE_SYS_FS_NFS_CLNT_H, 0))
-@@ -570,7 +594,7 @@
- dnl 
- dnl  fam is a good deal less interesting without imon.
- dnl 
--if test "$have_imon" != 'yes'; then
-+if test "$have_imon" != 'yes' -a "$have_dnotify" != 'yes'; then
-     cat << EOF
- 
-   ******************************************************************
+ # Checks for typedefs, structures, and compiler characteristics.
+ AC_HEADER_STDBOOL
