@@ -41,7 +41,7 @@ Summary(pl):	Monitor zmian w plikach - wspólne pliki
 Group:		Daemons
 Prereq:		portmap
 Requires:	%{name}-libs = %{version}-%{release}
-Obsoletes:	fam <= 0:2.6.10-2
+Obsoletes:	fam < 2.7.0
 
 %description common
 FAM, the File Alteration Monitor, provides a daemon and an API which
@@ -61,9 +61,9 @@ específicos.
 Summary:	inetd configs for FAM
 Summary(pl):	Pliki konfiguracyjne do u¿ycia FAM poprzez inetd
 Group:		Daemons
-PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
+PreReq:		%{name}-common = %{version}-%{release}
 PreReq:		rc-inetd
-Provides:	fam = %{epoch}:%{version}-%{release}
+Provides:	fam = %{version}-%{release}
 Requires:	inetdaemon
 Requires:	portmap
 Obsoletes:	fam-standalone
@@ -81,10 +81,10 @@ Pliki konfiguracyjna FAM do startowania demona poprzez inetd.
 Summary:	Standalone daemon configs for FAM
 Summary(pl):	Pliki konfiguracyjne do startowania FAM w trybie standalone
 Group:		Daemons
-PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
+PreReq:		%{name}-common = %{version}-%{release}
 PreReq:		rc-scripts
 Requires(post,preun):	/sbin/chkconfig
-Provides:	fam = %{epoch}:%{version}-%{release}
+Provides:	fam = %{version}-%{release}
 Obsoletes:	fam-inetd
 
 %description standalone
