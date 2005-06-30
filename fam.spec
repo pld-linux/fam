@@ -222,8 +222,8 @@ fi
 
 %files standalone
 %defattr(644,root,root,755)
-%attr(640,root,root) %config(noreplace) %verify(not size mtime md5) /etc/sysconfig/fam
-%attr(754,root,root) /etc/rc.d/init.d/fam
+%attr(640,root,root) %config(noreplace) %verify(not size mtime md5) /etc/sysconfig/famd
+%attr(754,root,root) /etc/rc.d/init.d/famd
 
 %files libs
 %defattr(644,root,root,755)
