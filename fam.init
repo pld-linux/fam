@@ -38,7 +38,7 @@ case "$1" in
 	# Check if the service is already running?
 	if [ ! -f /var/lock/subsys/fam ]; then
 		msg_starting "File Alteration Monitor"
-		daemon fam -T0 $FAM_OPTS
+		daemon fam -T 0 $FAM_OPTS
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/fam
 	else
