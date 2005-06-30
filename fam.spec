@@ -2,20 +2,18 @@ Summary:	FAM, the File Alteration Monitor
 Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
-Version:	2.6.10
-Release:	2.3
+Version:	2.7.0
+Release:	0.1
 License:	GPL
 Group:		Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
-# Source0-md5:	1c5a2ea659680bdd1e238d7828a857a7
+# Source0-md5:	1bf3ae6c0c58d3201afc97c6a4834e39
 Source1:	%{name}.inetd
 Source2:	%{name}.init
 Source3:	%{name}.sysconfig
 Patch0:		%{name}-dnotify.patch
-Patch1:		%{name}-build.patch
-Patch2:		%{name}-rpcsvc.patch
-Patch3:		%{name}-cleanup.patch
-Patch4:		%{name}-gcc34.patch
+Patch1:		%{name}-cleanup.patch
+Patch2:		%{name}-gcc34.patch
 URL:		http://oss.sgi.com/projects/fam/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -154,8 +152,6 @@ Bibliotecas estáticas para desenvolvimento com a libfam.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
-%patch4 -p1
 
 %build
 %{__libtoolize}
@@ -175,8 +171,8 @@ install -d $RPM_BUILD_ROOT/etc/{sysconfig/rc-inetd,rc.d/init.d}
 	DESTDIR=$RPM_BUILD_ROOT
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/rc-inetd/sgi_fam
-install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/fam
-install %{SOURCE3} $RPM_BUILD_ROOT/etc/sysconfig/fam
+install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/famd
+install %{SOURCE3} $RPM_BUILD_ROOT/etc/sysconfig/famd
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -194,19 +190,19 @@ if [ -f /var/lock/subsys/rc-inetd ]; then
 fi
 
 %post standalone
-/sbin/chkconfig --add fam
-if [ -f /var/lock/subsys/fam ]; then
-	/etc/rc.d/init.d/fam restart 1>&2
+/sbin/chkconfig --add famd
+if [ -f /var/lock/subsys/famd ]; then
+	/etc/rc.d/init.d/famd restart 1>&2
 else
-	echo "Run \"/etc/rc.d/init.d/fam start\" to start FAM daemon."
+	echo "Run \"/etc/rc.d/init.d/famd start\" to start FAM daemon."
 fi
 
 %preun standalone
 if [ "$1" = "0" ]; then
-	if [ -f /var/lock/subsys/fam ]; then
-		/etc/rc.d/init.d/fam stop 1>&2
+	if [ -f /var/lock/subsys/famd ]; then
+		/etc/rc.d/init.d/famd stop 1>&2
 	fi
-	/sbin/chkconfig --del fam
+	/sbin/chkconfig --del famd
 fi
 
 %post	libs -p /sbin/ldconfig
@@ -215,9 +211,10 @@ fi
 %files common
 %defattr(644,root,root,755)
 %doc AUTHORS ChangeLog NEWS README TODO
-%attr(755,root,root) %{_bindir}/*
+%attr(755,root,root) %{_sbindir}/*
 %config %{_sysconfdir}/%{name}.conf
-%{_mandir}/man1/fam.1m*
+%{_mandir}/man5/*
+%{_mandir}/man8/*
 
 %files inetd
 %defattr(644,root,root,755)
