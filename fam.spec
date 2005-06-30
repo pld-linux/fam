@@ -3,7 +3,7 @@ Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.7.0
-Release:	0.1
+Release:	1
 License:	GPL
 Group:		Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
@@ -40,8 +40,8 @@ Summary:	FAM, the File Alteration Monitor - common files
 Summary(pl):	Monitor zmian w plikach - wspólne pliki
 Group:		Daemons
 Prereq:		portmap
-Requires:	%{name}-libs = %{version}-%{release}
-Obsoletes:	fam < 2.7.0
+Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
+Obsoletes:	fam < 0:2.7.0
 
 %description common
 FAM, the File Alteration Monitor, provides a daemon and an API which
@@ -61,12 +61,13 @@ específicos.
 Summary:	inetd configs for FAM
 Summary(pl):	Pliki konfiguracyjne do u¿ycia FAM poprzez inetd
 Group:		Daemons
-PreReq:		%{name}-common = %{version}-%{release}
+PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
 PreReq:		rc-inetd
-Provides:	fam = %{version}-%{release}
+Provides:	fam = %{epoch}:%{version}-%{release}
 Requires:	inetdaemon
 Requires:	portmap
 Obsoletes:	fam-standalone
+Conflicts:	gamin
 Conflicts:	rlinetd
 Conflicts:	inetd
 #Requires:	xinetd
@@ -81,10 +82,11 @@ Pliki konfiguracyjna FAM do startowania demona poprzez inetd.
 Summary:	Standalone daemon configs for FAM
 Summary(pl):	Pliki konfiguracyjne do startowania FAM w trybie standalone
 Group:		Daemons
-PreReq:		%{name}-common = %{version}-%{release}
+PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
 PreReq:		rc-scripts
 Requires(post,preun):	/sbin/chkconfig
-Provides:	fam = %{version}-%{release}
+Provides:	fam = %{epoch}:%{version}-%{release}
+Conflicts:	gamin
 Obsoletes:	fam-inetd
 
 %description standalone
@@ -101,6 +103,7 @@ Summary(pt_BR):	FAM, um monitor de alteraçoes em arquivos
 License:	LGPL
 Group:		Libraries
 Obsoletes:	libfam0
+Conflicts:	gamin-libs
 
 %description libs
 Libraries for FAM.
@@ -117,9 +120,10 @@ Summary(pl):	Pliki nag³ówkowe FAM
 Summary(pt_BR):	Arquivos para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
-Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
 Requires:	libstdc++-devel
 Obsoletes:	libfam0-devel
+Conflicts:	gamin-devel
 
 %description devel
 Includes to develop using FAM.
@@ -136,7 +140,8 @@ Summary(pl):	Biblioteki statyczne FAM
 Summary(pt_BR):	Bibliotecas estáticas para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}-%{release}
+Requires:	%{name}-devel = %{epoch}:%{version}-%{release}
+Conflicts:	gamin-static
 
 %description static
 FAM static libraries.
