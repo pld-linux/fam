@@ -63,13 +63,13 @@ Summary(pl):	Pliki konfiguracyjne do u¿ycia FAM poprzez inetd
 Group:		Daemons
 PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
 PreReq:		rc-inetd
-Provides:	fam = %{epoch}:%{version}-%{release}
 Requires:	inetdaemon
 Requires:	portmap
+Provides:	fam = %{epoch}:%{version}-%{release}
 Obsoletes:	fam-standalone
 Conflicts:	gamin
-Conflicts:	rlinetd
 Conflicts:	inetd
+Conflicts:	rlinetd
 #Requires:	xinetd
 
 %description inetd
@@ -86,8 +86,8 @@ PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
 PreReq:		rc-scripts
 Requires(post,preun):	/sbin/chkconfig
 Provides:	fam = %{epoch}:%{version}-%{release}
-Conflicts:	gamin
 Obsoletes:	fam-inetd
+Conflicts:	gamin
 
 %description standalone
 FAM configs for running as a standalone daemon.
