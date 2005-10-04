@@ -3,7 +3,7 @@ Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.7.0
-Release:	1
+Release:	1.1
 License:	GPL
 Group:		Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
@@ -39,7 +39,7 @@ específicos.
 Summary:	FAM, the File Alteration Monitor - common files
 Summary(pl):	Monitor zmian w plikach - wspólne pliki
 Group:		Daemons
-Prereq:		portmap
+Requires:	portmap
 Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
 Obsoletes:	fam < 0:2.7.0
 
@@ -61,8 +61,8 @@ específicos.
 Summary:	inetd configs for FAM
 Summary(pl):	Pliki konfiguracyjne do u¿ycia FAM poprzez inetd
 Group:		Daemons
-PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
-PreReq:		rc-inetd
+Requires:	%{name}-common = %{epoch}:%{version}-%{release}
+Requires:	rc-inetd
 Requires:	inetdaemon
 Requires:	portmap
 Provides:	fam = %{epoch}:%{version}-%{release}
@@ -82,8 +82,9 @@ Pliki konfiguracyjna FAM do startowania demona poprzez inetd.
 Summary:	Standalone daemon configs for FAM
 Summary(pl):	Pliki konfiguracyjne do startowania FAM w trybie standalone
 Group:		Daemons
-PreReq:		%{name}-common = %{epoch}:%{version}-%{release}
-PreReq:		rc-scripts
+Requires:	%{name}-common = %{epoch}:%{version}-%{release}
+Requires:	rc-scripts
+Requires:	/sbin/chkconfig
 Requires(post,preun):	/sbin/chkconfig
 Provides:	fam = %{epoch}:%{version}-%{release}
 Obsoletes:	fam-inetd
@@ -93,8 +94,7 @@ Conflicts:	gamin
 FAM configs for running as a standalone daemon.
 
 %description standalone -l pl
-Pliki konfiguracyjne FAM do startowania demona w trybie
-standalone.
+Pliki konfiguracyjne FAM do startowania demona w trybie standalone.
 
 %package libs
 Summary:	Libraries for FAM
@@ -227,7 +227,7 @@ fi
 
 %files standalone
 %defattr(644,root,root,755)
-%attr(640,root,root) %config(noreplace) %verify(not size mtime md5) /etc/sysconfig/famd
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/famd
 %attr(754,root,root) /etc/rc.d/init.d/famd
 
 %files libs
