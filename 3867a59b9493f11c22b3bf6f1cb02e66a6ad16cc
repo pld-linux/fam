@@ -1,0 +1,7 @@
+- release 7,
+- add -fno-rtti -fno-exceptions to CXXFLAGS and map %{__cc} on %{__cxx} (now
+  libstdc++ patch can be removed),
+- per subpackage License field (mail GPL all other LGPL),
+- fixed requires rules for libs, devel and static subpackages.
+  Added TODO:
+- add rc-inetd upport or fam service.
