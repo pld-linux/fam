@@ -3,7 +3,7 @@ Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.7.0
-Release:	1.1
+Release:	2
 License:	GPL
 Group:		Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
@@ -14,6 +14,7 @@ Source3:	%{name}.sysconfig
 Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-cleanup.patch
 Patch2:		%{name}-gcc34.patch
+Patch3:		%{name}-paths.patch
 URL:		http://oss.sgi.com/projects/fam/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -39,8 +40,8 @@ específicos.
 Summary:	FAM, the File Alteration Monitor - common files
 Summary(pl):	Monitor zmian w plikach - wspólne pliki
 Group:		Daemons
-Requires:	portmap
 Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
+Requires:	portmap
 Obsoletes:	fam < 0:2.7.0
 
 %description common
@@ -62,15 +63,15 @@ Summary:	inetd configs for FAM
 Summary(pl):	Pliki konfiguracyjne do u¿ycia FAM poprzez inetd
 Group:		Daemons
 Requires:	%{name}-common = %{epoch}:%{version}-%{release}
-Requires:	rc-inetd
 Requires:	inetdaemon
 Requires:	portmap
+Requires:	rc-inetd
+#Requires:	xinetd
 Provides:	fam = %{epoch}:%{version}-%{release}
 Obsoletes:	fam-standalone
 Conflicts:	gamin
 Conflicts:	inetd
 Conflicts:	rlinetd
-#Requires:	xinetd
 
 %description inetd
 FAM configs for running from inetd.
@@ -82,10 +83,10 @@ Pliki konfiguracyjna FAM do startowania demona poprzez inetd.
 Summary:	Standalone daemon configs for FAM
 Summary(pl):	Pliki konfiguracyjne do startowania FAM w trybie standalone
 Group:		Daemons
-Requires:	%{name}-common = %{epoch}:%{version}-%{release}
-Requires:	rc-scripts
-Requires:	/sbin/chkconfig
 Requires(post,preun):	/sbin/chkconfig
+Requires:	%{name}-common = %{epoch}:%{version}-%{release}
+Requires:	/sbin/chkconfig
+Requires:	rc-scripts
 Provides:	fam = %{epoch}:%{version}-%{release}
 Obsoletes:	fam-inetd
 Conflicts:	gamin
@@ -157,6 +158,7 @@ Bibliotecas estáticas para desenvolvimento com a libfam.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 %{__libtoolize}
