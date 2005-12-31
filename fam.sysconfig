@@ -4,5 +4,4 @@
 SERVICE_RUN_NICE_LEVEL="+5"
 
 # Cmdline options 
-FAM_OPTS=""
-
+FAM_OPTS="-L"
