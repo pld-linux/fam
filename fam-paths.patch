@@ -1,5 +1,5 @@
 diff -u /home/builder/rpm/BUILD/fam-2.7.0/man.orig/famd.8 man/famd.8
---- fam-2.7.0/man.orig/famd.8	2003-01-20 02:58:11.000000000 +0200
+--- fam-2.7.0/man/famd.8	2003-01-20 02:58:11.000000000 +0200
 +++ man/famd.8	2005-12-31 12:50:49.000000000 +0200
 @@ -63,7 +63,7 @@
  files that the client can \fBstat\fR.
@@ -11,7 +11,7 @@ diff -u /home/builder/rpm/BUILD/fam-2.7.0/man.orig/famd.8 man/famd.8
  .SH "SEE ALSO"
  fam(3), famd.conf(5), inetd(8), portmap(8), stat(1), xinetd(8)
 diff -u /home/builder/rpm/BUILD/fam-2.7.0/man.orig/famd.conf.5 man/famd.conf.5
---- fam-2.7.0/man.orig/famd.conf.5	2003-01-20 03:03:21.000000000 +0200
+--- fam-2.7.0/man/famd.conf.5	2003-01-20 03:03:21.000000000 +0200
 +++ man/famd.conf.5	2005-12-31 12:50:49.000000000 +0200
 @@ -4,7 +4,7 @@
  .SH SYNOPSIS
