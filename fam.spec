@@ -3,7 +3,7 @@ Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.7.0
-Release:	2
+Release:	3
 License:	GPL
 Group:		Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
@@ -15,6 +15,7 @@ Patch0:		%{name}-dnotify.patch
 Patch1:		%{name}-cleanup.patch
 Patch2:		%{name}-gcc34.patch
 Patch3:		%{name}-paths.patch
+Patch4:		%{name}-gcc4.patch
 URL:		http://oss.sgi.com/projects/fam/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -159,6 +160,7 @@ Bibliotecas estáticas para desenvolvimento com a libfam.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 %{__libtoolize}
