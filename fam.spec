@@ -41,9 +41,9 @@ específicos.
 Summary:	FAM, the File Alteration Monitor - common files
 Summary(pl):	Monitor zmian w plikach - wspólne pliki
 Group:		Daemons
-Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 Requires:	portmap
-Obsoletes:	fam < 0:2.7.0
+Obsoletes:	fam < 2.7.0
 
 %description common
 FAM, the File Alteration Monitor, provides a daemon and an API which
@@ -63,12 +63,12 @@ específicos.
 Summary:	inetd configs for FAM
 Summary(pl):	Pliki konfiguracyjne do u¿ycia FAM poprzez inetd
 Group:		Daemons
-Requires:	%{name}-common = %{epoch}:%{version}-%{release}
+Requires:	%{name}-common = %{version}-%{release}
 Requires:	inetdaemon
 Requires:	portmap
 Requires:	rc-inetd
 #Requires:	xinetd
-Provides:	fam = %{epoch}:%{version}-%{release}
+Provides:	fam = %{version}-%{release}
 Obsoletes:	fam-standalone
 Conflicts:	gamin
 Conflicts:	inetd
@@ -85,10 +85,10 @@ Summary:	Standalone daemon configs for FAM
 Summary(pl):	Pliki konfiguracyjne do startowania FAM w trybie standalone
 Group:		Daemons
 Requires(post,preun):	/sbin/chkconfig
-Requires:	%{name}-common = %{epoch}:%{version}-%{release}
+Requires:	%{name}-common = %{version}-%{release}
 Requires:	/sbin/chkconfig
 Requires:	rc-scripts
-Provides:	fam = %{epoch}:%{version}-%{release}
+Provides:	fam = %{version}-%{release}
 Obsoletes:	fam-inetd
 Conflicts:	gamin
 
@@ -122,7 +122,7 @@ Summary(pl):	Pliki nag³ówkowe FAM
 Summary(pt_BR):	Arquivos para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
-Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 Requires:	libstdc++-devel
 Obsoletes:	libfam0-devel
 Conflicts:	gamin-devel
@@ -142,7 +142,7 @@ Summary(pl):	Biblioteki statyczne FAM
 Summary(pt_BR):	Bibliotecas estáticas para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
-Requires:	%{name}-devel = %{epoch}:%{version}-%{release}
+Requires:	%{name}-devel = %{version}-%{release}
 Conflicts:	gamin-static
 
 %description static
