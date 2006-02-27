@@ -21,6 +21,7 @@ BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
+BuildRequires:	rpmbuild(macros) >= 1.268
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -187,30 +188,20 @@ install %{SOURCE3} $RPM_BUILD_ROOT/etc/sysconfig/famd
 rm -rf $RPM_BUILD_ROOT
 
 %post inetd
-if [ -f /var/lock/subsys/rc-inetd ]; then
-	/etc/rc.d/init.d/rc-inetd reload 1>&2
-else
-	echo "Type \"/etc/rc.d/init.d/rc-inetd start\" to start inet server" 1>&2
-fi
+%service -q rc-inetd reload
 
 %postun inetd
-if [ -f /var/lock/subsys/rc-inetd ]; then
-	/etc/rc.d/init.d/rc-inetd reload
+if [ "$1" = 0 ]; then
+	%service -q rc-inetd reload
 fi
 
 %post standalone
 /sbin/chkconfig --add famd
-if [ -f /var/lock/subsys/famd ]; then
-	/etc/rc.d/init.d/famd restart 1>&2
-else
-	echo "Run \"/etc/rc.d/init.d/famd start\" to start FAM daemon."
-fi
+%service famd restart "FAM daemon"
 
 %preun standalone
 if [ "$1" = "0" ]; then
-	if [ -f /var/lock/subsys/famd ]; then
-		/etc/rc.d/init.d/famd stop 1>&2
-	fi
+	%service famd stop
 	/sbin/chkconfig --del famd
 fi
 
