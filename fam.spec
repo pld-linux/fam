@@ -72,8 +72,9 @@ Requires:	rc-inetd
 Provides:	fam = %{version}-%{release}
 Obsoletes:	fam-standalone
 Conflicts:	gamin
-# RPC support doesn't seem to work in inetd/rlinetd
-Conflicts:	inetd
+# no RPC support in rc-inet script before
+Conflicts:	inetd < 0.17-12
+# rlinetd doesn't support tcp "wait" flag properly
 Conflicts:	rlinetd
 
 %description inetd
