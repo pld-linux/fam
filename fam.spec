@@ -72,6 +72,7 @@ Requires:	rc-inetd
 Provides:	fam = %{version}-%{release}
 Obsoletes:	fam-standalone
 Conflicts:	gamin
+# RPC support doesn't seem to work in inetd/rlinetd
 Conflicts:	inetd
 Conflicts:	rlinetd
 
@@ -184,6 +185,9 @@ install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/rc-inetd/sgi_fam
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/famd
 install %{SOURCE3} $RPM_BUILD_ROOT/etc/sysconfig/famd
 
+install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+install test/test.c++ $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -235,6 +239,7 @@ fi
 %{_libdir}/lib*.la
 %{_includedir}/*.h
 %{_mandir}/man3/*
+%{_examplesdir}/%{name}-%{version}
 
 %files static
 %defattr(644,root,root,755)
