@@ -1,7 +1,6 @@
 SERVICE_NAME=sgi_fam
 SOCK_TYPE=stream
 PROTOCOL=tcp
-PORT=0
 FLAGS=wait
 USER=root
 GROUP=nobody
