@@ -3,7 +3,7 @@ Summary(pl):	Monitor zmian w plikach
 Summary(pt_BR):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.7.0
-Release:	4
+Release:	5
 License:	GPL
 Group:		Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
@@ -68,14 +68,15 @@ Requires:	%{name}-common = %{version}-%{release}
 Requires:	inetdaemon
 Requires:	portmap
 Requires:	rc-inetd
-#Requires:	xinetd
 Provides:	fam = %{version}-%{release}
 Obsoletes:	fam-standalone
 Conflicts:	gamin
 # no RPC support in rc-inet script before
 Conflicts:	inetd < 0.17-12
-# rlinetd doesn't support tcp "wait" flag properly
-Conflicts:	rlinetd
+# no working RPC and tcp/wait support before
+Conflicts:	rlinetd < 0.6-1
+# PORT option was required before
+Conflicts:	xinetd < 2.3.14-2
 
 %description inetd
 FAM configs for running from inetd.
