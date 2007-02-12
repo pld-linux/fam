@@ -1,6 +1,6 @@
 Summary:	FAM, the File Alteration Monitor
-Summary(pl.UTF-8):   Monitor zmian w plikach
-Summary(pt_BR.UTF-8):   FAM, um monitor de alterações em arquivos
+Summary(pl.UTF-8):	Monitor zmian w plikach
+Summary(pt_BR.UTF-8):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.7.0
 Release:	6
@@ -40,7 +40,7 @@ específicos.
 
 %package common
 Summary:	FAM, the File Alteration Monitor - common files
-Summary(pl.UTF-8):   Monitor zmian w plikach - wspólne pliki
+Summary(pl.UTF-8):	Monitor zmian w plikach - wspólne pliki
 Group:		Daemons
 Requires:	%{name}-libs = %{version}-%{release}
 Requires:	portmap
@@ -62,7 +62,7 @@ específicos.
 
 %package inetd
 Summary:	inetd configs for FAM
-Summary(pl.UTF-8):   Pliki konfiguracyjne do użycia FAM poprzez inetd
+Summary(pl.UTF-8):	Pliki konfiguracyjne do użycia FAM poprzez inetd
 Group:		Daemons
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	inetdaemon
@@ -87,7 +87,7 @@ Pliki konfiguracyjna FAM do startowania demona poprzez inetd.
 
 %package standalone
 Summary:	Standalone daemon configs for FAM
-Summary(pl.UTF-8):   Pliki konfiguracyjne do startowania FAM w trybie standalone
+Summary(pl.UTF-8):	Pliki konfiguracyjne do startowania FAM w trybie standalone
 Group:		Daemons
 Requires(post,preun):	/sbin/chkconfig
 Requires:	%{name}-common = %{version}-%{release}
@@ -106,8 +106,8 @@ Pliki konfiguracyjne FAM do startowania demona w trybie standalone.
 
 %package libs
 Summary:	Libraries for FAM
-Summary(pl.UTF-8):   Biblioteki FAMa
-Summary(pt_BR.UTF-8):   FAM, um monitor de alteraçoes em arquivos
+Summary(pl.UTF-8):	Biblioteki FAMa
+Summary(pt_BR.UTF-8):	FAM, um monitor de alteraçoes em arquivos
 License:	LGPL
 Group:		Libraries
 Obsoletes:	libfam0
@@ -124,8 +124,8 @@ FAM, um monitor de alteraçoes em arquivos.
 
 %package devel
 Summary:	Includes to develop using FAM
-Summary(pl.UTF-8):   Pliki nagłówkowe FAM
-Summary(pt_BR.UTF-8):   Arquivos para desenvolvimento com a libfam
+Summary(pl.UTF-8):	Pliki nagłówkowe FAM
+Summary(pt_BR.UTF-8):	Arquivos para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
@@ -144,8 +144,8 @@ Bibliotecas e arquivos de inclusão para desenvolvimento com a libfam.
 
 %package static
 Summary:	FAM static libraries
-Summary(pl.UTF-8):   Biblioteki statyczne FAM
-Summary(pt_BR.UTF-8):   Bibliotecas estáticas para desenvolvimento com a libfam
+Summary(pl.UTF-8):	Biblioteki statyczne FAM
+Summary(pt_BR.UTF-8):	Bibliotecas estáticas para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
