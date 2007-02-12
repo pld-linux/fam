@@ -1,6 +1,6 @@
 Summary:	FAM, the File Alteration Monitor
-Summary(pl):	Monitor zmian w plikach
-Summary(pt_BR):	FAM, um monitor de alterações em arquivos
+Summary(pl.UTF-8):   Monitor zmian w plikach
+Summary(pt_BR.UTF-8):   FAM, um monitor de alteraÃ§Ãµes em arquivos
 Name:		fam
 Version:	2.7.0
 Release:	6
@@ -29,18 +29,18 @@ FAM, the File Alteration Monitor, provides a daemon and an API which
 applications can use to be notified when specific files or directories
 are changed.
 
-%description -l pl
-FAM dostarcza serwer i API pozwalaj±ce aplikacjom na uzyskiwanie
-informacji o zmianach w okre¶lonych plikach lub katalogach.
+%description -l pl.UTF-8
+FAM dostarcza serwer i API pozwalajÄ…ce aplikacjom na uzyskiwanie
+informacji o zmianach w okreÅ›lonych plikach lub katalogach.
 
-%description -l pt_BR
-O FAM fornece um servidor e uma API que aplicações podem usar para
-receber notificações sobre mudanças em arquivos ou diretórios
-específicos.
+%description -l pt_BR.UTF-8
+O FAM fornece um servidor e uma API que aplicaÃ§Ãµes podem usar para
+receber notificaÃ§Ãµes sobre mudanÃ§as em arquivos ou diretÃ³rios
+especÃ­ficos.
 
 %package common
 Summary:	FAM, the File Alteration Monitor - common files
-Summary(pl):	Monitor zmian w plikach - wspólne pliki
+Summary(pl.UTF-8):   Monitor zmian w plikach - wspÃ³lne pliki
 Group:		Daemons
 Requires:	%{name}-libs = %{version}-%{release}
 Requires:	portmap
@@ -51,18 +51,18 @@ FAM, the File Alteration Monitor, provides a daemon and an API which
 applications can use to be notified when specific files or directories
 are changed.
 
-%description common -l pl
-FAM dostarcza serwer i API pozwalaj±ce aplikacjom na uzyskiwanie
-informacji o zmianach w okre¶lonych plikach lub katalogach.
+%description common -l pl.UTF-8
+FAM dostarcza serwer i API pozwalajÄ…ce aplikacjom na uzyskiwanie
+informacji o zmianach w okreÅ›lonych plikach lub katalogach.
 
-%description common -l pt_BR
-O FAM fornece um servidor e uma API que aplicações podem usar para
-receber notificações sobre mudanças em arquivos ou diretórios
-específicos.
+%description common -l pt_BR.UTF-8
+O FAM fornece um servidor e uma API que aplicaÃ§Ãµes podem usar para
+receber notificaÃ§Ãµes sobre mudanÃ§as em arquivos ou diretÃ³rios
+especÃ­ficos.
 
 %package inetd
 Summary:	inetd configs for FAM
-Summary(pl):	Pliki konfiguracyjne do u¿ycia FAM poprzez inetd
+Summary(pl.UTF-8):   Pliki konfiguracyjne do uÅ¼ycia FAM poprzez inetd
 Group:		Daemons
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	inetdaemon
@@ -82,12 +82,12 @@ Conflicts:	xinetd < 2.3.14-2
 %description inetd
 FAM configs for running from inetd.
 
-%description inetd -l pl
+%description inetd -l pl.UTF-8
 Pliki konfiguracyjna FAM do startowania demona poprzez inetd.
 
 %package standalone
 Summary:	Standalone daemon configs for FAM
-Summary(pl):	Pliki konfiguracyjne do startowania FAM w trybie standalone
+Summary(pl.UTF-8):   Pliki konfiguracyjne do startowania FAM w trybie standalone
 Group:		Daemons
 Requires(post,preun):	/sbin/chkconfig
 Requires:	%{name}-common = %{version}-%{release}
@@ -101,13 +101,13 @@ Conflicts:	gamin
 %description standalone
 FAM configs for running as a standalone daemon.
 
-%description standalone -l pl
+%description standalone -l pl.UTF-8
 Pliki konfiguracyjne FAM do startowania demona w trybie standalone.
 
 %package libs
 Summary:	Libraries for FAM
-Summary(pl):	Biblioteki FAMa
-Summary(pt_BR):	FAM, um monitor de alteraçoes em arquivos
+Summary(pl.UTF-8):   Biblioteki FAMa
+Summary(pt_BR.UTF-8):   FAM, um monitor de alteraÃ§oes em arquivos
 License:	LGPL
 Group:		Libraries
 Obsoletes:	libfam0
@@ -116,16 +116,16 @@ Conflicts:	gamin-libs
 %description libs
 Libraries for FAM.
 
-%description libs -l pl
+%description libs -l pl.UTF-8
 Biblioteki FAMa.
 
-%description libs -l pt_BR
-FAM, um monitor de alteraçoes em arquivos.
+%description libs -l pt_BR.UTF-8
+FAM, um monitor de alteraÃ§oes em arquivos.
 
 %package devel
 Summary:	Includes to develop using FAM
-Summary(pl):	Pliki nag³ówkowe FAM
-Summary(pt_BR):	Arquivos para desenvolvimento com a libfam
+Summary(pl.UTF-8):   Pliki nagÅ‚Ã³wkowe FAM
+Summary(pt_BR.UTF-8):   Arquivos para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
@@ -136,16 +136,16 @@ Conflicts:	gamin-devel
 %description devel
 Includes to develop using FAM.
 
-%description devel -l pl
-Pliki nag³ówkowe FAM.
+%description devel -l pl.UTF-8
+Pliki nagÅ‚Ã³wkowe FAM.
 
-%description devel -l pt_BR
-Bibliotecas e arquivos de inclusão para desenvolvimento com a libfam.
+%description devel -l pt_BR.UTF-8
+Bibliotecas e arquivos de inclusÃ£o para desenvolvimento com a libfam.
 
 %package static
 Summary:	FAM static libraries
-Summary(pl):	Biblioteki statyczne FAM
-Summary(pt_BR):	Bibliotecas estáticas para desenvolvimento com a libfam
+Summary(pl.UTF-8):   Biblioteki statyczne FAM
+Summary(pt_BR.UTF-8):   Bibliotecas estÃ¡ticas para desenvolvimento com a libfam
 License:	LGPL
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
@@ -154,11 +154,11 @@ Conflicts:	gamin-static
 %description static
 FAM static libraries.
 
-%description static -l pl
+%description static -l pl.UTF-8
 Biblioteki statyczne FAM.
 
-%description static -l pt_BR
-Bibliotecas estáticas para desenvolvimento com a libfam.
+%description static -l pt_BR.UTF-8
+Bibliotecas estÃ¡ticas para desenvolvimento com a libfam.
 
 %prep
 %setup -q
