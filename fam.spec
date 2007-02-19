@@ -3,7 +3,7 @@ Summary(pl.UTF-8):	Monitor zmian w plikach
 Summary(pt_BR.UTF-8):	FAM, um monitor de alterações em arquivos
 Name:		fam
 Version:	2.7.0
-Release:	6
+Release:	7
 License:	GPL
 Group:		Daemons
 Source0:	ftp://oss.sgi.com/projects/fam/download/stable/%{name}-%{version}.tar.gz
