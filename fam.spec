@@ -92,7 +92,7 @@ Group:		Daemons
 Requires(post,preun):	/sbin/chkconfig
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	/sbin/chkconfig
-Requires:	rc-scripts
+Requires:	rc-scripts >= 0.4.1.5
 Provides:	fam = %{version}-%{release}
 Obsoletes:	fam < 2.7.0
 Obsoletes:	fam-inetd
