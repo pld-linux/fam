@@ -83,7 +83,7 @@ Conflicts:	xinetd < 2.3.14-2
 FAM configs for running from inetd.
 
 %description inetd -l pl.UTF-8
-Pliki konfiguracyjna FAM do startowania demona poprzez inetd.
+Pliki konfiguracyjne FAM do startowania demona poprzez inetd.
 
 %package standalone
 Summary:	Standalone daemon configs for FAM
