@@ -11,3 +11,14 @@
      static volatile int queue_head; // Only modified by read handler
      static volatile int queue_tail; // Only modified by signal handler
      static EventHandler ehandler;
+--- fam-2.7.0/src/Interest.h.orig	2008-08-30 13:44:30.000000000 +0200
++++ fam-2.7.0/src/Interest.h	2008-08-30 13:45:14.000000000 +0200
+@@ -81,7 +81,7 @@
+ protected:
+ 
+     bool do_stat();
+-    virtual void post_event(const Event&, const char * = NULL) = 0;
++    virtual void post_event(const Event&, const char * = 0) = 0;
+     char& ci_bits()			{ return ci_char; }
+     char& dir_bits()			{ return dir_char; }
+     const char& ci_bits() const		{ return ci_char; }
