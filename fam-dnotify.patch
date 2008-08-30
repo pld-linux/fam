@@ -64,7 +64,7 @@
 +    FileWatch *hash_link;
 +    
 +    FileWatch(void) {
-+	dir_watch = NULL;
++	dir_watch = 0;
 +	n_dir_watches = 0;
 +    }
 +
@@ -85,7 +85,7 @@
 +	Node *first;
 +
 +	FileWatchList(void) {
-+	    first = NULL;
++	    first = 0;
 +	}
 +	
 +	void prepend(FileWatch *watch);
@@ -133,7 +133,7 @@
 +bool
 +DNotify::DirWatch::FileWatchList::empty(void)
 +{
-+    return first == NULL;
++    return first == 0;
 +}
 +
 +int
@@ -170,7 +170,7 @@
 +    Node *l, *prev;
 +    
 +    l = first;
-+    prev = NULL;
++    prev = 0;
 +    while (l) {
 +	if (l->watch == watch) {
 +	    if (prev)
@@ -189,7 +189,7 @@
 +
 +DNotify::DNotify(EventHandler h)
 +{
-+    assert(ehandler == NULL);
++    assert(ehandler == 0);
 +    ehandler = h;
 +}
 +
@@ -213,7 +213,7 @@
 +	    Log::debug("closed pipe write end");
 +	pipe_read_fd = -1;
 +    }
-+    ehandler = NULL;
++    ehandler = 0;
 +}
 +
 +void
@@ -335,7 +335,7 @@
 +      }
 +  }
 +  
-+  return NULL;
++  return 0;
 +}
 +
 +DNotify::FileWatch *
@@ -394,7 +394,7 @@
 +      }
 +      p = &(*p)->hash_link;
 +  }
-+  w->hash_link = NULL;
++  w->hash_link = 0;
 +}
 +
 +void
@@ -411,7 +411,7 @@
 +      }
 +      p = &(*p)->hash_link;
 +  }
-+  w->hash_link = NULL;
++  w->hash_link = 0;
 +}
 +
 +DNotify::Status
@@ -431,7 +431,7 @@
 +	Log::debug ("New DirWatch for %s (%x %x)\n",
 +		    notify_dir, (int)stat.st_dev, (int)stat.st_ino);
 +	dwatch = new DirWatch;
-+	dwatch->hash_link = NULL;
++	dwatch->hash_link = 0;
 +	dwatch->dir_dev = stat.st_dev;
 +	dwatch->dir_ino = stat.st_ino;
 +	dwatch->fd = open(notify_dir, O_RDONLY);
@@ -509,7 +509,7 @@
 +    // to a recycled inode that we don't otherwise care about.
 +    //
 +    struct stat st;
-+    if (status == NULL) {
++    if (status == 0) {
 +	status = &st;
 +    }
 +    if (::lstat(name, status) == -1) {
@@ -545,7 +545,7 @@
 +
 +    // Lookup FileWatch by dev:ino, and its DirWatch.
 +    fwatch = lookup_filewatch (dev, ino);
-+    if (fwatch == NULL)
++    if (fwatch == 0)
 +	return BAD;
 +
 +    // delete FileWatch, if last FileWatch: close fd, delete DirWatch
@@ -865,7 +865,7 @@
          // Express interest.
          IMon::Status s = IMon::BAD;
 -	s = imon.express(name(), NULL);
-+	s = monitor->express(name(), NULL);
++	s = monitor->express(name(), 0);
          if (s != IMon::OK) {
              return true;
          }
