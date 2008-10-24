@@ -1,7 +1,0 @@
-# Customized settings for FAM
-
-# Nice level for fam
-SERVICE_RUN_NICE_LEVEL="+5"
-
-# Cmdline options 
-FAM_OPTS="-L"
